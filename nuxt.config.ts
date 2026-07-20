@@ -74,6 +74,7 @@ export default defineNuxtConfig({
   // Sitemap configuration — static + dynamic blog routes from Sanity
   sitemap: {
     siteUrl: 'https://deflowlabs.io',
+    zeroRuntime: true,
     urls: [
       '/',
       '/product',
