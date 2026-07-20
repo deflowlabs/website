@@ -1,0 +1,382 @@
+<template>
+  <footer class="footer">
+    <div class="footer__inner container">
+      <!-- Brand Column -->
+      <div class="footer__brand">
+        <NuxtLink to="/" class="footer__logo" aria-label="DeFlow Labs Home">
+          <span class="footer__logo-icon">◆</span>
+          <span class="footer__logo-text">DeFlow</span>
+        </NuxtLink>
+        <p class="footer__tagline">
+          The institutional settlement layer for digital asset dealflows.
+        </p>
+
+        <!-- Newsletter Signup -->
+        <form class="footer__newsletter" @submit.prevent="subscribe">
+          <div class="footer__newsletter-input-wrap">
+            <input
+              v-model="email"
+              type="email"
+              placeholder="Your email"
+              aria-label="Newsletter email"
+              class="footer__newsletter-input"
+              :disabled="subscribed"
+              required
+            />
+            <button
+              type="submit"
+              class="footer__newsletter-btn"
+              :disabled="subscribing || subscribed"
+              aria-label="Subscribe to newsletter"
+            >
+              <span v-if="subscribing">...</span>
+              <span v-else-if="subscribed">✓</span>
+              <svg v-else width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="m5 12 14 0" /><path d="m13 18 6-6-6-6" />
+              </svg>
+            </button>
+          </div>
+          <p v-if="message" class="footer__newsletter-msg" :class="{ 'footer__newsletter-msg--error': isError }">
+            {{ message }}
+          </p>
+        </form>
+
+        <div class="footer__social">
+          <a href="https://linkedin.com/company/deflowlabs" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect width="4" height="12" x="2" y="9"/><circle cx="4" cy="4" r="2"/></svg>
+          </a>
+          <a href="https://github.com/DeFlowLabs" target="_blank" rel="noopener noreferrer" aria-label="GitHub">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"/><path d="M9 18c-4.51 2-5-2-7-2"/></svg>
+          </a>
+          <a href="https://x.com/DeFlowLabs" target="_blank" rel="noopener noreferrer" aria-label="X (Twitter)">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+          </a>
+          <a href="https://discord.gg/deflowlabs" target="_blank" rel="noopener noreferrer" aria-label="Discord">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.095 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.095 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/></svg>
+          </a>
+        </div>
+      </div>
+
+      <!-- Solutions Column -->
+      <div class="footer__column">
+        <h3 class="footer__heading">Solutions</h3>
+        <ul class="footer__list">
+          <li><NuxtLink to="/product">Product</NuxtLink></li>
+          <li><NuxtLink to="/for-desks">For Desks</NuxtLink></li>
+          <li><NuxtLink to="/security">Security</NuxtLink></li>
+        </ul>
+      </div>
+
+      <!-- Resources Column -->
+      <div class="footer__column">
+        <h3 class="footer__heading">Resources</h3>
+        <ul class="footer__list">
+          <li><NuxtLink to="/blog">Blog</NuxtLink></li>
+          <li><a href="https://docs.deflowlabs.io" target="_blank" rel="noopener">Documentation</a></li>
+          <li><NuxtLink to="/labs">Labs</NuxtLink></li>
+          <li><a href="https://github.com/DeFlowLabs" target="_blank" rel="noopener">GitHub</a></li>
+        </ul>
+      </div>
+
+      <!-- Company Column -->
+      <div class="footer__column">
+        <h3 class="footer__heading">Company</h3>
+        <ul class="footer__list">
+          <li><NuxtLink to="/about">About</NuxtLink></li>
+          <li><NuxtLink to="/contact">Contact</NuxtLink></li>
+        </ul>
+      </div>
+
+      <!-- Legal Column -->
+      <div class="footer__column">
+        <h3 class="footer__heading">Legal</h3>
+        <ul class="footer__list">
+          <li><NuxtLink to="/legal/terms">Terms of Service</NuxtLink></li>
+          <li><NuxtLink to="/legal/privacy">Privacy Policy</NuxtLink></li>
+          <li><NuxtLink to="/legal/risk">Risk Disclosure</NuxtLink></li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Bottom Bar -->
+    <div class="footer__bottom">
+      <div class="container footer__bottom-inner">
+        <p class="footer__copyright">
+          &copy; {{ currentYear }} DeFlow Labs. All rights reserved.
+        </p>
+        <p class="footer__settled">
+          Settled on DeFlow
+        </p>
+      </div>
+    </div>
+  </footer>
+</template>
+
+<script setup lang="ts">
+/**
+ * FooterSection v2 — 5-column footer with newsletter signup, social links,
+ * structured navigation, and legal links.
+ */
+const currentYear = new Date().getFullYear()
+
+const email = ref('')
+const subscribing = ref(false)
+const subscribed = ref(false)
+const message = ref('')
+const isError = ref(false)
+
+/**
+ * Subscribe to newsletter via Zero-PII endpoint.
+ * Hashes email server-side, stores only the hash.
+ */
+async function subscribe() {
+  if (!email.value || subscribing.value || subscribed.value) return
+  subscribing.value = true
+  message.value = ''
+  isError.value = false
+
+  try {
+    const res = await $fetch<{ success: boolean; message: string }>('/api/newsletter', {
+      method: 'POST',
+      body: { email: email.value },
+    })
+    message.value = res.message
+    subscribed.value = true
+    email.value = ''
+  } catch (err: any) {
+    isError.value = true
+    message.value = err.data?.message || 'Something went wrong. Please try again.'
+  } finally {
+    subscribing.value = false
+  }
+}
+</script>
+
+<style scoped>
+.footer {
+  background: var(--color-obsidian-deep);
+  border-top: 1px solid var(--color-border);
+  padding-top: 4rem;
+}
+
+.footer__inner {
+  display: grid;
+  grid-template-columns: 1.8fr 1fr 1fr 1fr 1fr;
+  gap: 2.5rem;
+  padding-bottom: 3rem;
+}
+
+.footer__brand {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.footer__logo {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  text-decoration: none;
+}
+
+.footer__logo-icon {
+  font-size: 1.25rem;
+  background: linear-gradient(135deg, #D3D3D3, #A3A3A3, #555555);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.footer__logo-text {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #FFFFFF;
+  letter-spacing: -0.02em;
+}
+
+.footer__tagline {
+  font-size: 0.875rem;
+  color: var(--color-muted-fg);
+  max-width: 280px;
+  line-height: 1.6;
+}
+
+/* Newsletter */
+.footer__newsletter {
+  margin-top: 0.25rem;
+}
+
+.footer__newsletter-input-wrap {
+  display: flex;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-card);
+  overflow: hidden;
+  transition: border-color 0.2s ease;
+}
+
+.footer__newsletter-input-wrap:focus-within {
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.footer__newsletter-input {
+  flex: 1;
+  padding: 0.5rem 0.75rem;
+  background: rgba(255, 255, 255, 0.04);
+  border: none;
+  color: var(--color-foreground);
+  font-size: 0.8125rem;
+  font-family: var(--font-primary);
+  outline: none;
+  min-width: 0;
+}
+
+.footer__newsletter-input::placeholder {
+  color: rgba(255, 255, 255, 0.25);
+}
+
+.footer__newsletter-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem 0.75rem;
+  background: rgba(255, 255, 255, 0.06);
+  border: none;
+  border-left: 1px solid rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.6);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.footer__newsletter-btn:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.1);
+  color: #FFFFFF;
+}
+
+.footer__newsletter-btn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.footer__newsletter-btn:focus-visible {
+  outline: 2px solid var(--color-ring);
+  outline-offset: -2px;
+}
+
+.footer__newsletter-msg {
+  font-size: 0.6875rem;
+  margin-top: 0.375rem;
+  color: #22C55E;
+}
+
+.footer__newsletter-msg--error {
+  color: #EF4444;
+}
+
+/* Social */
+.footer__social {
+  display: flex;
+  gap: 1rem;
+  margin-top: 0.25rem;
+}
+
+.footer__social a {
+  color: rgba(255, 255, 255, 0.4);
+  transition: color 0.2s ease;
+}
+
+.footer__social a:hover {
+  color: #FFFFFF;
+}
+
+/* Columns */
+.footer__column {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.footer__heading {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.footer__list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.footer__list a {
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.5);
+  transition: color 0.2s ease;
+  text-decoration: none;
+}
+
+.footer__list a:hover {
+  color: #FFFFFF;
+}
+
+/* Bottom */
+.footer__bottom {
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  padding: 1.5rem 0;
+}
+
+.footer__bottom-inner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.footer__copyright {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.footer__settled {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.5);
+  letter-spacing: 0.05em;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .footer__inner {
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 2rem;
+  }
+
+  .footer__brand {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 768px) {
+  .footer__inner {
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+  }
+
+  .footer__brand {
+    grid-column: 1 / -1;
+  }
+
+  .footer__bottom-inner {
+    flex-direction: column;
+    gap: 0.5rem;
+    text-align: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .footer__inner {
+    grid-template-columns: 1fr;
+  }
+}
+</style>

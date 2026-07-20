@@ -1,0 +1,5 @@
+# DeFlow Labs — robots.txt
+User-agent: *
+Allow: /
+
+Sitemap: https://deflowlabs.io/sitemap.xml

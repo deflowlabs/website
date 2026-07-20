@@ -1,0 +1,36 @@
+{
+  "name": "@deflow/website",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "build": "nuxt build",
+    "dev": "nuxt dev",
+    "generate": "nuxt generate",
+    "preview": "nuxt preview",
+    "postinstall": "nuxt prepare",
+    "lint": "eslint .",
+    "typecheck": "nuxt typecheck"
+  },
+  "dependencies": {
+    "@nuxt/fonts": "^0.14.0",
+    "@nuxt/image": "^2.0.0",
+    "@nuxtjs/sitemap": "^8.2.3",
+    "@resvg/resvg-js": "^2.6.2",
+    "@sanity/client": "^7.3.0",
+    "@sanity/image-url": "^1.1.0",
+    "nuxt": "^4.4.8",
+    "nuxt-og-image": "^6.7.3",
+    "nuxt-site-config": "^4.1.2",
+    "satori": "^0.28.1",
+    "vue": "^3.5.39",
+    "vue-router": "^5.1.0"
+  },
+  "devDependencies": {
+    "@nuxt/eslint": "^1.4.0",
+    "@tailwindcss/typography": "^0.5.0",
+    "@tailwindcss/vite": "^4.1.0",
+    "tailwindcss": "^4.1.0",
+    "typescript": "^5.8.0",
+    "vue-tsc": "^3.3.7"
+  }
+}

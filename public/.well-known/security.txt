@@ -1,0 +1,5 @@
+Contact: mailto:security@deflowlabs.io
+Preferred-Languages: en
+Canonical: https://deflowlabs.io/.well-known/security.txt
+Policy: https://deflowlabs.io/security
+Expires: 2027-07-20T00:00:00.000Z
