@@ -57,11 +57,18 @@ export default defineNuxtConfig({
   css: ['~/assets/css/main.css'],
 
   modules: [
+    '@nuxt/icon',
     '@nuxt/image',
     '@nuxt/fonts',
     '@nuxtjs/sitemap',
     'nuxt-og-image',
   ],
+
+  // Icon configuration — Lucide icons for Atmospheric Institutional design
+  icon: {
+    serverBundle: 'local',
+    collections: ['lucide'],
+  },
 
   // Font configuration — Geist (primary) + Geist Mono (data)
   fonts: {
