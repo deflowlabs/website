@@ -6,7 +6,7 @@
       <div class="hero__content container">
         <div class="hero__badge badge badge-premium animate-fade-in">
           <span class="hero__badge-dot" />
-          Private Beta — Coming Soon
+          Private Beta
         </div>
 
         <h1 class="hero__title animate-fade-in-up">
@@ -16,17 +16,18 @@
         </h1>
 
         <p class="hero__subtitle animate-fade-in-up delay-100">
-          Non-custodial smart escrow. Compliant identity verification.
-          Programmable settlement. Your deals flow through DeFlow.
+          From OTC trades to syndicate raises, RWA settlement to private equity transfers.
+          Verified counterparties, programmable escrow, instant finality.
+          Your deals flow through DeFlow.
         </p>
 
         <div class="hero__actions animate-fade-in-up delay-200">
           <NuxtLink to="/waitlist" class="btn btn-primary btn-lg">
             Join the Waitlist
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+            <Icon name="lucide:chevron-right" size="16" />
           </NuxtLink>
           <NuxtLink to="/product" class="btn btn-secondary btn-lg">
-            Explore the Product
+            See How It Works
           </NuxtLink>
         </div>
 
@@ -51,7 +52,7 @@
               <div class="hero__preview-sidebar">
                 <div class="hero__preview-nav-item active">Deal Room</div>
                 <div class="hero__preview-nav-item">Syndicates</div>
-                <div class="hero__preview-nav-item">Analytics</div>
+                <div class="hero__preview-nav-item">Portfolio</div>
                 <div class="hero__preview-nav-item">Settings</div>
               </div>
               <div class="hero__preview-main">
@@ -83,12 +84,33 @@
       </div>
     </section>
 
-    <!-- ===== TRUST STRIP ===== -->
+    <!-- ===== POWERED BY STRIP ===== -->
     <section class="trust-strip">
       <div class="container">
-        <p class="trust-strip__label">BUILT WITH</p>
+        <p class="trust-strip__label">POWERED BY</p>
         <div class="trust-strip__logos">
           <span v-for="logo in techLogos" :key="logo" class="trust-strip__logo">{{ logo }}</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== DEAL TYPES ===== -->
+    <section class="deal-types section">
+      <div class="container">
+        <div class="section-header">
+          <span class="badge badge-info">Dealflow Types</span>
+          <h2>One platform. Every deal type.</h2>
+          <p>DeFlow settles more than OTC trades. From bilateral deals to multi-investor raises, every dealflow type gets the same institutional-grade infrastructure.</p>
+        </div>
+
+        <div class="deal-types__grid">
+          <div v-for="dt in dealTypes" :key="dt.title" class="deal-types__card glass-card">
+            <div class="deal-types__icon" :style="{ background: dt.iconBg }">
+              <Icon :name="dt.icon" size="20" />
+            </div>
+            <h3>{{ dt.title }}</h3>
+            <p>{{ dt.description }}</p>
+          </div>
         </div>
       </div>
     </section>
@@ -99,13 +121,13 @@
         <div class="section-header">
           <span class="badge badge-premium">Core Capabilities</span>
           <h2>Everything institutional settlement needs</h2>
-          <p>From deal creation to final settlement — every step is verified, compliant, and non-custodial.</p>
+          <p>From deal creation to final settlement. Every step is verified, compliant, and non-custodial.</p>
         </div>
 
         <div class="features__grid">
-          <div v-for="(feature, i) in features" :key="feature.title" class="features__card glass-card">
+          <div v-for="feature in features" :key="feature.title" class="features__card glass-card">
             <div class="features__icon" :style="{ background: feature.iconBg }">
-              <span>{{ feature.icon }}</span>
+              <Icon :name="feature.icon" size="20" />
             </div>
             <h3>{{ feature.title }}</h3>
             <p>{{ feature.description }}</p>
@@ -114,16 +136,13 @@
       </div>
     </section>
 
-    <!-- ===== TESTIMONIALS ===== -->
-    <TestimonialSlider />
-
     <!-- ===== HOW IT WORKS ===== -->
     <section class="how-it-works section">
       <div class="container">
         <div class="section-header">
           <span class="badge badge-info">Settlement Flow</span>
           <h2>Five steps to settled</h2>
-          <p>From deal draft to final settlement — fully automated, fully compliant.</p>
+          <p>From deal draft to final settlement. Fully automated, fully compliant.</p>
         </div>
 
         <div class="how-it-works__steps">
@@ -136,7 +155,7 @@
       </div>
     </section>
 
-    <!-- ===== SECURITY ===== -->
+    <!-- ===== SECURITY & COMPLIANCE ===== -->
     <section class="security section">
       <div class="container">
         <div class="security__inner">
@@ -145,21 +164,56 @@
             <h2>Built for institutions.<br />Trusted by design.</h2>
             <p>
               DeFlow never holds your assets. We never store your identity.
-              Every transaction is verified on-chain with 6-block finality.
+              Every transaction is verified on-chain with deterministic finality.
             </p>
             <ul class="security__list">
               <li v-for="item in securityFeatures" :key="item">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#22C55E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+                <Icon name="lucide:check" size="16" style="color: #22C55E; flex-shrink: 0;" />
                 {{ item }}
               </li>
             </ul>
           </div>
           <div class="security__visual">
             <div class="security__shield glass-card">
-              <div class="security__shield-icon">🛡️</div>
+              <!-- Placeholder: Designer will provide custom shield illustration -->
+              <div class="security__shield-image">
+                <Icon name="lucide:shield-check" size="64" style="color: rgba(255,255,255,0.3);" />
+              </div>
               <div class="security__shield-label">ZERO-PII</div>
-              <div class="security__shield-sub">No personal data stored</div>
+              <div class="security__shield-sub">No personal data stored. Ever.</div>
             </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== WHAT DEFLOW IS / IS NOT ===== -->
+    <section class="is-isnot section">
+      <div class="container">
+        <div class="section-header">
+          <span class="badge badge-warning">Positioning</span>
+          <h2>What DeFlow is. And is not.</h2>
+          <p>Think of DeFlow as the SWIFT for digital assets. We're the infrastructure, not the bank.</p>
+        </div>
+
+        <div class="is-isnot__grid">
+          <div class="is-isnot__column is-isnot__column--yes">
+            <h3>
+              <Icon name="lucide:check-circle" size="20" style="color: #22C55E;" />
+              DeFlow IS
+            </h3>
+            <ul>
+              <li v-for="item in deflowIs" :key="item">{{ item }}</li>
+            </ul>
+          </div>
+          <div class="is-isnot__column is-isnot__column--no">
+            <h3>
+              <Icon name="lucide:x-circle" size="20" style="color: #EF4444;" />
+              DeFlow is NOT
+            </h3>
+            <ul>
+              <li v-for="item in deflowIsNot" :key="item">{{ item }}</li>
+            </ul>
           </div>
         </div>
       </div>
@@ -185,13 +239,13 @@
             <span class="badge badge-premium">DeFlow Labs</span>
             <h2>Where finance meets<br />frontier research</h2>
             <p>
-              Our R&D arm collaborates with top universities and PhD researchers
-              to advance digital asset infrastructure, compliance frameworks,
-              and settlement technology.
+              Our R&D arm, officially recognized as an "Instituição de I&D"
+              by FCT (Portugal's leading science foundation), collaborates
+              with top universities on AI, settlement research, and compliance innovation.
             </p>
             <NuxtLink to="/labs" class="btn btn-secondary">
               Explore Labs
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+              <Icon name="lucide:chevron-right" size="16" />
             </NuxtLink>
           </div>
           <div class="labs-preview__visual">
@@ -224,7 +278,11 @@
 <script setup lang="ts">
 /**
  * Homepage — DeFlow Labs marketing landing page.
- * Sections: Hero, Trust Strip, Features, How It Works, Security, Stats, Labs Preview, CTA.
+ * Sections: Hero, Powered By, Deal Types, Features, How It Works,
+ * Security, IS/IS NOT, Stats, Labs Preview, CTA.
+ *
+ * Content aligned with pitch deck narrative: multi-deal-type settlement
+ * platform, not just OTC. Jargon-free for multi-audience accessibility.
  */
 useHead({
   title: 'DeFlow Labs — Institutional Settlement Layer for Digital Asset Dealflows',
@@ -235,76 +293,121 @@ useStructuredData(WEBSITE_SCHEMA)
 
 const techLogos = ['Ethereum', 'Safe', 'Privy', 'Alchemy', 'Google Cloud', 'Foundry']
 
+const heroStats = [
+  { value: '5', label: 'Deal Types' },
+  { value: '0', label: 'PII Stored' },
+  { value: '$25K+', label: 'Min Deal Size' },
+  { value: '< 15 min', label: 'Settlement' },
+]
+
+const dealTypes = [
+  {
+    icon: 'lucide:arrow-left-right',
+    iconBg: 'rgba(99, 102, 241, 0.1)',
+    title: 'OTC Trades',
+    description: 'Bilateral large-value trades with verified counterparties and transparent fee schedules.',
+  },
+  {
+    icon: 'lucide:users',
+    iconBg: 'rgba(139, 92, 246, 0.1)',
+    title: 'Syndicate Raises',
+    description: 'Multi-investor capital formation with allocation management and batch escrow settlement.',
+  },
+  {
+    icon: 'lucide:landmark',
+    iconBg: 'rgba(245, 158, 11, 0.1)',
+    title: 'RWA Tokenization',
+    description: 'Settlement for real-world-asset-to-token conversions with compliance-verified provenance.',
+  },
+  {
+    icon: 'lucide:briefcase',
+    iconBg: 'rgba(16, 185, 129, 0.1)',
+    title: 'PE Secondaries',
+    description: 'Private equity position transfers with identity verification and audit trails.',
+  },
+  {
+    icon: 'lucide:layers',
+    iconBg: 'rgba(236, 72, 153, 0.1)',
+    title: 'Structured Products',
+    description: 'Complex multi-party dealflows with custom terms, escrow conditions, and settlement logic.',
+  },
+]
+
 const features = [
   {
-    icon: '🔐',
+    icon: 'lucide:lock',
     iconBg: 'rgba(99, 102, 241, 0.1)',
     title: 'Smart Escrow',
-    description: 'Programmable smart contract escrow holds funds until all conditions are met. Non-custodial by design.',
+    description: 'Programmable smart contract escrow holds funds until all conditions are met. Non-custodial. No third party ever holds your assets.',
   },
   {
-    icon: '🛡️',
+    icon: 'lucide:shield-check',
     iconBg: 'rgba(16, 185, 129, 0.1)',
     title: 'Zero-PII Identity',
-    description: 'HMAC-SHA256 hashed identities. Raw personal data never reaches our database. Privacy-first compliance.',
+    description: 'Your identity is verified but never stored. Personal data is cryptographically hashed at the edge and discarded. Our database holds zero personal information.',
   },
   {
-    icon: '✓',
+    icon: 'lucide:scan-eye',
     iconBg: 'rgba(245, 158, 11, 0.1)',
     title: 'Identity Verification',
-    description: 'Tiered KYC/AML with real-time sanctions screening. OFAC, EU, UN watchlists monitored continuously.',
+    description: 'Tiered identity checks with real-time sanctions screening. OFAC, EU, UN, and OFSI watchlists monitored continuously.',
   },
   {
-    icon: '⭐',
+    icon: 'lucide:star',
     iconBg: 'rgba(139, 92, 246, 0.1)',
     title: 'VIP Tiers & Rewards',
-    description: '19-milestone progression system. Volume-based discounts, fee credits, and priority settlement access.',
+    description: '19-milestone progression system. Volume-based discounts, fee credits, and priority settlement access as your activity grows.',
   },
   {
-    icon: '⛓️',
+    icon: 'lucide:link-2',
     iconBg: 'rgba(59, 130, 246, 0.1)',
     title: 'Multi-Asset Settlement',
-    description: 'USDC today, multi-currency tomorrow. Cross-chain settlement with deterministic finality.',
+    description: 'USDC today, multi-currency tomorrow. Settlement with deterministic on-chain finality across supported networks.',
   },
   {
-    icon: '🤝',
+    icon: 'lucide:handshake',
     iconBg: 'rgba(236, 72, 153, 0.1)',
     title: 'Referral Engine',
-    description: 'Dual-bucket rewards — fee credits and cash. Earn 5-10% of platform fees on every referred deal.',
+    description: 'Dual-bucket rewards split into fee credits and cash. Earn 5 to 10% of platform fees on every referred deal.',
   },
 ]
 
 const steps = [
-  { title: 'Deal Setup', description: 'Define terms, asset type, and settlement amount in the deal wizard.' },
-  { title: 'Review & Invite', description: 'Review terms and invite your counterparty via wallet address or email.' },
-  { title: 'Deploy Escrow', description: 'Smart escrow contract deployed on-chain. Funds locked until conditions met.' },
-  { title: 'Fund & Confirm', description: 'Both parties fund the escrow. On-chain events verify each deposit.' },
-  { title: 'Settlement', description: 'Assets released atomically. Chain-verified, final, and irreversible.' },
+  { title: 'Deal Setup', description: 'Define terms, asset type, and settlement amount. Works for OTC, syndicates, and structured deals.' },
+  { title: 'Review & Invite', description: 'Review terms and invite your counterparty. Both parties must pass identity verification.' },
+  { title: 'Deploy Escrow', description: 'A smart escrow contract is deployed on-chain. Funds are locked until all conditions are met.' },
+  { title: 'Fund & Confirm', description: 'Both parties fund the escrow. On-chain events verify each deposit in real time.' },
+  { title: 'Settlement', description: 'Assets released atomically. Chain-verified, final, and irreversible. Portfolio updated automatically.' },
 ]
 
 const securityFeatures = [
-  'Non-custodial — we never hold your assets',
-  'Zero-PII — no personal data in our database',
-  'OWASP ZAP weekly security scans',
-  'Smart contract audited with Slither + Foundry fuzz',
-  'WCAG 2 AA accessibility compliant',
-  '6-block finality confirmation',
-  'Wallet sanctions screening (OFAC/EU/UN)',
-  'ERC-4337 smart accounts via Pimlico',
+  'Non-custodial. We never hold your assets.',
+  'Zero-PII. No personal data in our database.',
+  'Smart contracts audited with rigorous security testing',
+  'Identity verification with sanctions screening',
+  'Deterministic on-chain finality',
+  'Wallet risk analysis (OFAC, EU, UN)',
 ]
 
-const heroStats = [
-  { value: '25+', label: 'Modules' },
-  { value: '48+', label: 'Tables' },
-  { value: '0', label: 'PII Stored' },
-  { value: '6-Block', label: 'Finality' },
+const deflowIs = [
+  'A settlement layer',
+  'A compliance engine',
+  'Escrow automation',
+  'Post-trade infrastructure',
+]
+
+const deflowIsNot = [
+  'Not an exchange',
+  'Not a custodian',
+  'Not a broker',
+  'Not a wallet',
 ]
 
 const stats = [
-  { value: '25+', label: 'Backend Modules' },
-  { value: '48+', label: 'Database Tables' },
-  { value: '14', label: 'CI/CD Workflows' },
+  { value: '5', label: 'Deal Types' },
+  { value: '9', label: 'Fee Tiers' },
   { value: '0', label: 'PII Stored' },
+  { value: '< 15 min', label: 'Avg Settlement' },
 ]
 </script>
 
@@ -357,7 +460,7 @@ const stats = [
 .hero__subtitle {
   font-size: 1.125rem;
   color: var(--color-muted-fg);
-  max-width: 560px;
+  max-width: 600px;
   line-height: 1.7;
 }
 
@@ -365,12 +468,6 @@ const stats = [
   display: flex;
   gap: 1rem;
   margin-top: 0.5rem;
-}
-
-.btn-lg {
-  min-height: 3rem;
-  padding: 0.75rem 1.75rem;
-  font-size: 15px;
 }
 
 /* Hero Stats Strip */
@@ -544,28 +641,45 @@ const stats = [
   transition: color 0.2s ease;
 }
 
-.trust-strip__logo:hover {
-  color: rgba(255, 255, 255, 0.5);
-}
-
-/* ===== Section Header ===== */
-.section-header {
-  text-align: center;
-  max-width: 600px;
-  margin: 0 auto 4rem;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+/* ===== Deal Types ===== */
+.deal-types__grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
   gap: 1rem;
 }
 
-.section-header h2 {
-  font-size: clamp(1.75rem, 3vw, 2.5rem);
+.deal-types__card {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  text-align: center;
+  transition: all 0.3s ease;
 }
 
-.section-header p {
-  font-size: 1rem;
-  color: var(--color-muted-fg);
+.deal-types__card:hover {
+  border-color: rgba(255, 255, 255, 0.15);
+  transform: translateY(-2px);
+}
+
+.deal-types__icon {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-icon);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.deal-types__card h3 {
+  font-size: 0.9375rem;
+}
+
+.deal-types__card p {
+  font-size: 0.8125rem;
+  line-height: 1.5;
 }
 
 /* ===== Features ===== */
@@ -595,7 +709,7 @@ const stats = [
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.25rem;
+  color: rgba(255, 255, 255, 0.8);
 }
 
 .features__card h3 {
@@ -710,8 +824,15 @@ const stats = [
   animation: float 6s ease-in-out infinite;
 }
 
-.security__shield-icon {
-  font-size: 3rem;
+.security__shield-image {
+  width: 80px;
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-icon);
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 .security__shield-label {
@@ -724,6 +845,51 @@ const stats = [
 .security__shield-sub {
   font-size: 0.75rem;
   color: var(--color-muted-fg);
+}
+
+/* ===== IS / IS NOT ===== */
+.is-isnot__grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+.is-isnot__column {
+  padding: 2rem;
+  border-radius: var(--radius-card);
+}
+
+.is-isnot__column h3 {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1.125rem;
+  margin-bottom: 1.25rem;
+}
+
+.is-isnot__column ul {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+}
+
+.is-isnot__column li {
+  font-size: 0.9375rem;
+  color: var(--color-muted-fg);
+  padding-left: 0.5rem;
+}
+
+.is-isnot__column--yes {
+  background: rgba(16, 185, 129, 0.04);
+  border: 1px solid rgba(16, 185, 129, 0.12);
+}
+
+.is-isnot__column--no {
+  background: rgba(239, 68, 68, 0.04);
+  border: 1px solid rgba(239, 68, 68, 0.12);
 }
 
 /* ===== Stats ===== */
@@ -818,6 +984,10 @@ const stats = [
 
 /* ===== Responsive ===== */
 @media (max-width: 1024px) {
+  .deal-types__grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
   .features__grid {
     grid-template-columns: repeat(2, 1fr);
   }
@@ -844,6 +1014,10 @@ const stats = [
 
   .security__visual {
     order: -1;
+  }
+
+  .is-isnot__grid {
+    grid-template-columns: 1fr;
   }
 
   .labs-preview__card {
@@ -879,6 +1053,10 @@ const stats = [
     display: none;
   }
 
+  .deal-types__grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
   .features__grid {
     grid-template-columns: 1fr;
   }
@@ -891,6 +1069,12 @@ const stats = [
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .deal-types__grid {
+    grid-template-columns: 1fr;
   }
 }
 </style>

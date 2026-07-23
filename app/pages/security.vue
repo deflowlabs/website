@@ -32,20 +32,20 @@
             </p>
             <ul class="sec-checklist">
               <li>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#22C55E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
-                Raw email discarded after HMAC-SHA256 hashing
+                <Icon name="lucide:check" size="16" style="color: #22C55E; flex-shrink: 0; margin-top: 2px;" />
+                Raw email discarded after cryptographic hashing
               </li>
               <li>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#22C55E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
-                No PII in database, logs, or Sentry error reports
+                <Icon name="lucide:check" size="16" style="color: #22C55E; flex-shrink: 0; margin-top: 2px;" />
+                No PII in database, logs, or error reports
               </li>
               <li>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#22C55E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
-                ZeroPiiExceptionFilter strips sensitive data from all responses
+                <Icon name="lucide:check" size="16" style="color: #22C55E; flex-shrink: 0; margin-top: 2px;" />
+                Automated filters strip sensitive data from all responses
               </li>
               <li>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#22C55E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
-                Email notifications via Privy REST API — backend never sees email strings
+                <Icon name="lucide:check" size="16" style="color: #22C55E; flex-shrink: 0; margin-top: 2px;" />
+                Email notifications via secure API. Backend never sees email strings.
               </li>
             </ul>
           </div>
@@ -81,7 +81,9 @@
         </div>
         <div class="sec-grid">
           <div v-for="audit in audits" :key="audit.title" class="sec-grid__card glass-card">
-            <span class="sec-grid__icon">{{ audit.icon }}</span>
+            <div class="sec-grid__icon-wrap">
+              <Icon :name="audit.icon" size="20" />
+            </div>
             <h3>{{ audit.title }}</h3>
             <p>{{ audit.desc }}</p>
           </div>
@@ -102,26 +104,29 @@
             </p>
             <ul class="sec-checklist">
               <li>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#22C55E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
-                OFAC / EU / UN / OFSI / MOFA / NBCTF screening
+                <Icon name="lucide:check" size="16" style="color: #22C55E; flex-shrink: 0; margin-top: 2px;" />
+                OFAC, EU, UN, OFSI, MOFA, NBCTF screening
               </li>
               <li>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#22C55E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
-                Wallet screening via Scorechain (Web3 AML)
+                <Icon name="lucide:check" size="16" style="color: #22C55E; flex-shrink: 0; margin-top: 2px;" />
+                Wallet risk analysis and screening
               </li>
               <li>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#22C55E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
-                24-hour TTL on AML results — stale data blocks funding
+                <Icon name="lucide:check" size="16" style="color: #22C55E; flex-shrink: 0; margin-top: 2px;" />
+                24-hour TTL on AML results. Stale data blocks funding.
               </li>
               <li>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#22C55E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
-                3-tier KYC: Basic → Enhanced → Corporate
+                <Icon name="lucide:check" size="16" style="color: #22C55E; flex-shrink: 0; margin-top: 2px;" />
+                3-tier verification: Basic, Enhanced, Corporate
               </li>
             </ul>
           </div>
           <div class="sec-section__visual">
             <div class="sec-shield glass-card">
-              <div class="sec-shield__icon">🛡️</div>
+              <!-- Placeholder: Designer will provide custom shield illustration -->
+              <div class="sec-shield__icon">
+                <Icon name="lucide:shield-check" size="48" style="color: rgba(255,255,255,0.3);" />
+              </div>
               <div class="sec-shield__badges">
                 <span v-for="badge in sanctionBadges" :key="badge" class="sec-shield__badge">{{ badge }}</span>
               </div>
@@ -145,7 +150,9 @@
         </div>
         <div class="sec-grid sec-grid--3col">
           <div v-for="item in settlementFeatures" :key="item.title" class="sec-grid__card glass-card">
-            <span class="sec-grid__icon">{{ item.icon }}</span>
+            <div class="sec-grid__icon-wrap">
+              <Icon :name="item.icon" size="20" />
+            </div>
             <h3>{{ item.title }}</h3>
             <p>{{ item.desc }}</p>
           </div>
@@ -157,7 +164,9 @@
     <section class="sec-bounty section">
       <div class="container">
         <div class="sec-bounty__card glass-card">
-          <span class="sec-bounty__icon">🐛</span>
+          <div class="sec-bounty__icon">
+            <Icon name="lucide:bug" size="36" style="color: rgba(255,255,255,0.4);" />
+          </div>
           <h2>Bug Bounty Program</h2>
           <p>Found a vulnerability? We take security seriously and reward responsible disclosure.</p>
           <span class="badge badge-warning">Coming Soon</span>
@@ -184,18 +193,18 @@ useHead({
 useStructuredData(ORGANIZATION_SCHEMA)
 
 const audits = [
-  { icon: '🔍', title: 'Slither Analysis', desc: 'Static analysis for common Solidity vulnerabilities, reentrancy, and gas optimization issues.' },
-  { icon: '🧪', title: 'Foundry Fuzz Testing', desc: 'Property-based fuzz testing with millions of random inputs to find edge cases.' },
-  { icon: '📐', title: 'Formal Verification', desc: 'Mathematical proofs for critical invariants in escrow and fee distribution contracts.' },
-  { icon: '🔒', title: 'Access Control Audit', desc: 'OpenZeppelin-based role separation with multi-sig requirements for administrative functions.' },
+  { icon: 'lucide:search-code', title: 'Static Analysis', desc: 'Automated analysis for common Solidity vulnerabilities, reentrancy, and gas optimization issues.' },
+  { icon: 'lucide:test-tubes', title: 'Fuzz Testing', desc: 'Property-based fuzz testing with millions of random inputs to find edge cases.' },
+  { icon: 'lucide:square-function', title: 'Formal Verification', desc: 'Mathematical proofs for critical invariants in escrow and fee distribution contracts.' },
+  { icon: 'lucide:lock', title: 'Access Control Audit', desc: 'Role separation with multi-sig requirements for administrative functions.' },
 ]
 
 const sanctionBadges = ['OFAC', 'EU', 'UN', 'OFSI', 'MOFA', 'NBCTF']
 
 const settlementFeatures = [
-  { icon: '⛓️', title: 'Non-Custodial', desc: 'DeFlow never holds your assets. Smart contracts manage escrow with deterministic release conditions.' },
-  { icon: '⏱️', title: '6-Block Finality', desc: 'All transactions confirmed with 6-block depth on Ethereum (Sepolia in staging, 1-block on Anvil).' },
-  { icon: '📊', title: 'Event Reconciliation', desc: 'On-chain events are immutable financial truth. UI confirms only after chain event verification.' },
+  { icon: 'lucide:link-2', title: 'Non-Custodial', desc: 'DeFlow never holds your assets. Smart contracts manage escrow with deterministic release conditions.' },
+  { icon: 'lucide:timer', title: 'Deterministic Finality', desc: 'All transactions confirmed with multi-block depth on Ethereum for guaranteed settlement.' },
+  { icon: 'lucide:activity', title: 'Event Reconciliation', desc: 'On-chain events are immutable financial truth. UI confirms only after chain event verification.' },
 ]
 </script>
 
@@ -333,8 +342,15 @@ const settlementFeatures = [
   gap: 0.75rem;
 }
 
-.sec-grid__icon {
-  font-size: 1.5rem;
+.sec-grid__icon-wrap {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-icon);
+  background: rgba(255, 255, 255, 0.05);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255, 255, 255, 0.6);
 }
 
 .sec-grid__card h3 {
@@ -359,7 +375,14 @@ const settlementFeatures = [
 }
 
 .sec-shield__icon {
-  font-size: 3rem;
+  width: 80px;
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-icon);
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 .sec-shield__badges {
@@ -413,7 +436,11 @@ const settlementFeatures = [
 }
 
 .sec-bounty__icon {
-  font-size: 3rem;
+  width: 64px;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .sec-bounty__card h2 {

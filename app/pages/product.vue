@@ -4,11 +4,12 @@
     <section class="product-hero section">
       <div class="container">
         <div class="section-header">
-          <span class="badge badge-info">Product</span>
+          <span class="badge badge-info">Platform Overview</span>
           <h1>The settlement layer<br />your deals deserve</h1>
           <p>
             DeFlow combines non-custodial smart escrow, compliant identity verification,
             and programmable settlement into a single, institutional-grade platform.
+            From OTC trades to syndicate raises, every dealflow type is covered.
           </p>
         </div>
       </div>
@@ -24,14 +25,17 @@
             <p>{{ feat.description }}</p>
             <ul class="product-feature__list">
               <li v-for="item in feat.points" :key="item">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#22C55E" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+                <Icon name="lucide:check" size="14" style="color: #22C55E; flex-shrink: 0;" />
                 {{ item }}
               </li>
             </ul>
           </div>
           <div class="product-feature__visual glass-card">
             <div class="product-feature__mock">
-              <span class="product-feature__mock-icon">{{ feat.icon }}</span>
+              <!-- Placeholder: Designer will provide custom illustrations -->
+              <div class="product-feature__mock-icon">
+                <Icon :name="feat.icon" size="48" style="color: rgba(255,255,255,0.25);" />
+              </div>
             </div>
           </div>
         </div>
@@ -48,7 +52,9 @@
         </div>
         <div class="product-security__grid">
           <div v-for="sec in securityItems" :key="sec.title" class="product-security__item glass-card">
-            <span class="product-security__icon">{{ sec.icon }}</span>
+            <div class="product-security__icon-wrap">
+              <Icon :name="sec.icon" size="20" />
+            </div>
             <h4>{{ sec.title }}</h4>
             <p>{{ sec.description }}</p>
           </div>
@@ -70,75 +76,80 @@
 </template>
 
 <script setup lang="ts">
+/**
+ * Platform Overview — Deep-dive into DeFlow's capabilities.
+ * Jargon-free descriptions for multi-audience accessibility.
+ * All emojis replaced with Lucide icons.
+ */
 useHead({
-  title: 'Product — DeFlow Labs',
+  title: 'Platform Overview — DeFlow Labs',
   meta: [
-    { name: 'description', content: 'Explore DeFlow\'s institutional settlement features — smart escrow, Zero-PII identity, VIP tiers, and programmable settlement.' },
+    { name: 'description', content: 'Explore DeFlow\'s institutional settlement platform: smart escrow, Zero-PII identity, VIP tiers, referral engine, and multi-asset settlement.' },
   ],
 })
 
 const deepFeatures = [
   {
-    icon: '🔐',
+    icon: 'lucide:lock',
     badge: 'Smart Escrow',
     badgeClass: 'badge-info',
     title: 'Programmable smart contract escrow',
-    description: 'Funds are locked in audited EscrowFactory contracts. No third party holds your assets — only the smart contract. Release conditions are deterministic and verified on-chain.',
+    description: 'Funds are locked in audited escrow contracts. No third party holds your assets. Release conditions are deterministic and verified on-chain.',
     points: [
-      'ERC-4337 smart accounts via Pimlico',
-      'EscrowFactory + FeeRouter contracts',
-      'Foundry fuzz testing + Slither analysis',
-      '6-block finality confirmation',
+      'Smart wallet accounts for gasless transactions',
+      'Audited escrow and fee routing contracts',
+      'Rigorous smart contract security testing',
+      'Deterministic on-chain finality',
     ],
   },
   {
-    icon: '🛡️',
+    icon: 'lucide:shield-check',
     badge: 'Zero-PII Identity',
     badgeClass: 'badge-success',
     title: 'Compliance without compromise',
-    description: 'Your identity is verified but never stored. We use HMAC-SHA256 to hash personal data at the edge — raw PII is discarded immediately. Our database has literally zero personal information.',
+    description: 'Your identity is verified but never stored. Personal data is cryptographically hashed at the authentication edge and discarded immediately. Our database holds zero personal information.',
     points: [
-      'HMAC-SHA256 identity hashing',
-      'Tiered KYC: L1, L2, L3 (KYB)',
-      'Real-time OFAC/EU/UN sanctions screening',
-      'Wallet screening via Scorechain',
+      'Cryptographic identity verification',
+      'Tiered verification: Basic, Enhanced, Corporate',
+      'Real-time OFAC, EU, UN sanctions screening',
+      'Wallet risk analysis and screening',
     ],
   },
   {
-    icon: '⭐',
+    icon: 'lucide:star',
     badge: 'VIP Program',
     badgeClass: 'badge-premium',
     title: '19 milestones. Unlimited rewards.',
-    description: 'From your first deal to Diamond+ status — every settled deal earns you fee discounts, priority access, and exclusive features. Volume-based progression with transparent thresholds.',
+    description: 'From your first deal to Diamond+ status. Every settled deal earns you fee discounts, priority access, and exclusive features. Volume-based progression with transparent thresholds.',
     points: [
-      'Bronze → Silver → Gold → Platinum → Diamond',
+      'Bronze through Silver, Gold, Platinum, Diamond',
       'Volume-based fee discounts up to 7%',
       'Priority settlement queue',
       'Custom desk branding at higher tiers',
     ],
   },
   {
-    icon: '🤝',
+    icon: 'lucide:handshake',
     badge: 'Referral Engine',
     badgeClass: 'badge-warning',
     title: 'Earn on every referred deal',
-    description: 'Dual-bucket referral system splits rewards into fee credits and cash. Standard referrers earn 5% of platform fees; Genesis partners earn 10%. Monthly caps scale with your tier.',
+    description: 'Dual-bucket referral system splits rewards into fee credits and cash. Standard referrers earn 5% of platform fees. Genesis partners earn 10%. Monthly caps scale with your tier.',
     points: [
-      'Fee credits + cash bucket split',
-      'Shadow identity for unregistered referrals',
+      'Fee credits and cash bucket split',
+      'Automatic linking for unregistered referrals',
       'Anti-wash trade protection',
-      '12-month credit expiry, $100 min withdrawal',
+      '$100 minimum withdrawal, 30-day cooldown',
     ],
   },
 ]
 
 const securityItems = [
-  { icon: '🔒', title: 'Non-Custodial', description: 'DeFlow never holds your assets. Smart contracts are the only custodians.' },
-  { icon: '🕵️', title: 'Zero-PII', description: 'No emails, names, or personal data in our database. Ever.' },
-  { icon: '🔍', title: 'Audited Contracts', description: 'Slither static analysis + Foundry fuzz testing on every deployment.' },
-  { icon: '🌐', title: 'Sanctions Screening', description: 'OFAC, EU, UN, OFSI, MOFA watchlists. 24h TTL auto-refresh.' },
-  { icon: '♿', title: 'WCAG 2 AA', description: 'Full accessibility compliance with automated Axe testing.' },
-  { icon: '📊', title: 'Sentry Monitoring', description: '100% error tracking, 20% transaction sampling, Zero-PII scrubbing.' },
+  { icon: 'lucide:lock', title: 'Non-Custodial', description: 'DeFlow never holds your assets. Smart contracts are the only custodians.' },
+  { icon: 'lucide:eye-off', title: 'Zero-PII', description: 'No emails, names, or personal data in our database. Ever.' },
+  { icon: 'lucide:search-code', title: 'Audited Contracts', description: 'Static analysis and fuzz testing on every smart contract deployment.' },
+  { icon: 'lucide:globe', title: 'Sanctions Screening', description: 'OFAC, EU, UN, OFSI watchlists with automatic refresh every 24 hours.' },
+  { icon: 'lucide:accessibility', title: 'WCAG 2 AA', description: 'Full accessibility compliance with automated testing on every build.' },
+  { icon: 'lucide:activity', title: 'Real-time Monitoring', description: '100% error tracking with privacy-preserving observability. No PII in logs.' },
 ]
 </script>
 
@@ -203,7 +214,14 @@ const securityItems = [
 }
 
 .product-feature__mock-icon {
-  font-size: 4rem;
+  width: 80px;
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-icon);
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 .product-security__grid {
@@ -219,8 +237,15 @@ const securityItems = [
   gap: 0.5rem;
 }
 
-.product-security__icon {
-  font-size: 1.5rem;
+.product-security__icon-wrap {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-icon);
+  background: rgba(255, 255, 255, 0.05);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255, 255, 255, 0.6);
 }
 
 .product-security__item h4 {

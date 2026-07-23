@@ -12,21 +12,21 @@
             </p>
             <div class="contact-channels">
               <div class="contact-channel">
-                <span class="contact-channel__icon">✉️</span>
+                <Icon name="lucide:mail" size="20" class="contact-channel__icon" />
                 <div>
                   <h4>Email</h4>
                   <a href="mailto:contact@deflowlabs.io">contact@deflowlabs.io</a>
                 </div>
               </div>
               <div class="contact-channel">
-                <span class="contact-channel__icon">💼</span>
+                <Icon name="lucide:linkedin" size="20" class="contact-channel__icon" />
                 <div>
                   <h4>LinkedIn</h4>
                   <a href="https://linkedin.com/company/deflowlabs" target="_blank" rel="noopener">DeFlow Labs</a>
                 </div>
               </div>
               <div class="contact-channel">
-                <span class="contact-channel__icon">🐙</span>
+                <Icon name="lucide:github" size="20" class="contact-channel__icon" />
                 <div>
                   <h4>GitHub</h4>
                   <a href="https://github.com/DeFlowLabs" target="_blank" rel="noopener">DeFlowLabs</a>
@@ -66,8 +66,8 @@
                 <textarea id="contact-message" v-model="form.message" required rows="5" placeholder="Tell us more..." />
               </div>
 
-              <!-- Turnstile widget (managed mode — invisible for most users) -->
-              <div ref="turnstileRef" class="contact-form__turnstile" />
+              <!-- Turnstile widget (invisible mode — hidden from UI) -->
+              <div ref="turnstileRef" style="display: none;" />
 
               <button type="submit" class="btn btn-primary" style="width: 100%" :disabled="loading || !turnstileToken">
                 {{ loading ? 'Sending...' : 'Send Message' }}
@@ -77,7 +77,9 @@
             </form>
 
             <div v-else class="contact-form__success">
-              <div class="contact-form__success-icon">✓</div>
+              <div class="contact-form__success-icon">
+                <Icon name="lucide:check" size="20" />
+              </div>
               <h3>Message sent!</h3>
               <p>We'll get back to you within 24-48 hours.</p>
             </div>
@@ -219,7 +221,8 @@ async function handleSubmit() {
 }
 
 .contact-channel__icon {
-  font-size: 1.25rem;
+  color: rgba(255, 255, 255, 0.5);
+  flex-shrink: 0;
   margin-top: 2px;
 }
 

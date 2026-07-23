@@ -10,8 +10,20 @@
             <p>
               DeFlow Labs is the R&amp;D arm of DeFlow Labs, Inc. We collaborate with
               top universities and PhD researchers to advance digital asset
-              infrastructure, compliance frameworks, and settlement technology.
+              infrastructure, AI-driven compliance, and settlement technology.
             </p>
+            <!-- FCT Recognition -->
+            <div class="labs-hero__recognition glass-card">
+              <Icon name="lucide:award" size="20" style="color: #A78BFA; flex-shrink: 0;" />
+              <div>
+                <span class="labs-hero__recognition-title">Recognized R&amp;D Institution</span>
+                <span class="labs-hero__recognition-desc">
+                  Officially recognized as an "Instituição de I&amp;D" by FCT
+                  (Fundação para a Ciência e a Tecnologia), one of Portugal's
+                  leading science foundations.
+                </span>
+              </div>
+            </div>
           </div>
           <div class="labs-hero__visual">
             <div class="labs-hero__orb" />
@@ -20,12 +32,14 @@
       </div>
     </section>
 
-    <!-- Mission -->
+    <!-- Mission Pillars -->
     <section class="labs-mission section">
       <div class="container">
         <div class="labs-mission__grid">
           <div v-for="pillar in pillars" :key="pillar.title" class="labs-mission__card glass-card">
-            <span class="labs-mission__icon">{{ pillar.icon }}</span>
+            <div class="labs-mission__icon-wrap">
+              <Icon :name="pillar.icon" size="24" />
+            </div>
             <h3>{{ pillar.title }}</h3>
             <p>{{ pillar.description }}</p>
           </div>
@@ -43,7 +57,6 @@
         </div>
 
         <div class="labs-projects__grid">
-          <!-- Dynamic Sanity projects -->
           <div v-for="project in projects" :key="project.slug" class="labs-project glass-card">
             <div class="labs-project__header">
               <span
@@ -70,14 +83,15 @@
               rel="noopener"
               class="labs-project__link"
             >
-              View Publication →
+              View Publication
+              <Icon name="lucide:arrow-right" size="14" />
             </a>
           </div>
 
           <!-- Coming Soon Placeholder -->
           <div class="labs-project glass-card labs-project--placeholder">
             <div class="labs-project__placeholder">
-              <span>+</span>
+              <Icon name="lucide:plus" size="24" />
               <p>More projects coming soon</p>
             </div>
           </div>
@@ -104,14 +118,15 @@
 <script setup lang="ts">
 /**
  * Labs page — R&D arm of DeFlow Labs.
- * Fetches projects from Sanity CMS, falls back to placeholder for upcoming project.
+ * Fetches projects from Sanity CMS, falls back to placeholder.
+ * Includes AI pillar and FCT recognition badge.
  */
 import { LABS_PROJECTS_QUERY } from '~/utils/sanity-queries'
 
 useHead({
   title: 'Labs — DeFlow Labs',
   meta: [
-    { name: 'description', content: 'DeFlow Labs R&D — collaborating with universities and PhD researchers to advance digital asset infrastructure and settlement technology.' },
+    { name: 'description', content: 'DeFlow Labs R&D — officially recognized by FCT. Collaborating with universities on AI, settlement research, and compliance innovation.' },
   ],
 })
 
@@ -138,17 +153,22 @@ const projects = computed(() => {
 
 const pillars = [
   {
-    icon: '🔬',
+    icon: 'lucide:flask-conical',
     title: 'Settlement Research',
     description: 'Advancing on-chain settlement mechanisms, cross-chain atomic swaps, and programmable escrow patterns.',
   },
   {
-    icon: '📜',
-    title: 'Compliance Innovation',
-    description: 'Zero-knowledge identity proofs, privacy-preserving KYC, and regulatory framework analysis for digital assets.',
+    icon: 'lucide:brain',
+    title: 'AI & Machine Learning',
+    description: 'Applying AI to risk assessment, compliance automation, and predictive analytics for digital asset markets.',
   },
   {
-    icon: '🏛️',
+    icon: 'lucide:scroll-text',
+    title: 'Compliance Innovation',
+    description: 'Zero-knowledge identity proofs, privacy-preserving verification, and regulatory framework analysis for digital assets.',
+  },
+  {
+    icon: 'lucide:graduation-cap',
     title: 'Academic Partnerships',
     description: 'Collaborating with top-tier universities on peer-reviewed research, publishing papers, and funding PhD positions.',
   },
@@ -174,6 +194,30 @@ const pillars = [
   font-size: clamp(2rem, 4vw, 3rem);
 }
 
+/* FCT Recognition Badge */
+.labs-hero__recognition {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 1rem 1.25rem;
+  margin-top: 0.5rem;
+}
+
+.labs-hero__recognition-title {
+  display: block;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.9);
+  margin-bottom: 0.25rem;
+}
+
+.labs-hero__recognition-desc {
+  display: block;
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.5);
+  line-height: 1.5;
+}
+
 .labs-hero__visual {
   display: flex;
   align-items: center;
@@ -192,7 +236,7 @@ const pillars = [
 
 .labs-mission__grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap: 1.25rem;
 }
 
@@ -203,8 +247,15 @@ const pillars = [
   gap: 0.75rem;
 }
 
-.labs-mission__icon {
-  font-size: 2rem;
+.labs-mission__icon-wrap {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-icon);
+  background: rgba(255, 255, 255, 0.05);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255, 255, 255, 0.6);
 }
 
 .labs-mission__card p {
@@ -263,6 +314,9 @@ const pillars = [
 }
 
 .labs-project__link {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
   font-size: 0.8125rem;
   color: rgba(255, 255, 255, 0.5);
   text-decoration: none;
@@ -289,13 +343,14 @@ const pillars = [
   color: rgba(255, 255, 255, 0.5);
 }
 
-.labs-project__placeholder span {
-  font-size: 2rem;
-  font-weight: 300;
-}
-
 .labs-project__placeholder p {
   font-size: 0.875rem;
+}
+
+@media (max-width: 1024px) {
+  .labs-mission__grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 
 @media (max-width: 768px) {

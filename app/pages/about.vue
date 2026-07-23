@@ -3,7 +3,7 @@
     <section class="about-hero section">
       <div class="container">
         <div class="section-header">
-          <span class="badge badge-premium">About</span>
+          <span class="badge badge-premium">Company</span>
           <h1>Building the settlement<br />infrastructure of tomorrow</h1>
           <p>
             DeFlow Labs is on a mission to make institutional digital asset
@@ -18,7 +18,9 @@
       <div class="container">
         <div class="about-values__grid">
           <div v-for="value in values" :key="value.title" class="about-values__card glass-card">
-            <span class="about-values__icon">{{ value.icon }}</span>
+            <div class="about-values__icon-wrap">
+              <Icon :name="value.icon" size="22" />
+            </div>
             <h3>{{ value.title }}</h3>
             <p>{{ value.description }}</p>
           </div>
@@ -60,7 +62,7 @@
 
 <script setup lang="ts">
 useHead({
-  title: 'About — DeFlow Labs',
+  title: 'Company — DeFlow Labs',
   meta: [
     { name: 'description', content: 'Learn about DeFlow Labs — our mission, values, and the team building the institutional settlement layer for digital assets.' },
   ],
@@ -68,34 +70,34 @@ useHead({
 
 const values = [
   {
-    icon: '🔐',
+    icon: 'lucide:lock',
     title: 'Non-Custodial by Default',
     description: 'We believe your assets should always remain under your control. Smart contracts, not intermediaries, hold funds during settlement.',
   },
   {
-    icon: '🕵️',
+    icon: 'lucide:eye-off',
     title: 'Privacy First',
     description: 'Zero-PII architecture means we verify your identity without ever storing your personal data. What we don\'t have, can\'t be breached.',
   },
   {
-    icon: '⚖️',
+    icon: 'lucide:scale',
     title: 'Compliance Without Compromise',
-    description: 'Full KYC/AML compliance with tiered verification. We meet regulatory requirements while protecting user privacy through cryptographic hashing.',
+    description: 'Full identity verification with tiered checks. We meet regulatory requirements while protecting privacy through cryptographic hashing.',
   },
   {
-    icon: '🧪',
+    icon: 'lucide:flask-conical',
     title: 'Research-Driven',
     description: 'DeFlow Labs collaborates with top universities and PhD researchers. Our technology is grounded in academic rigor and peer-reviewed research.',
   },
   {
-    icon: '🌍',
+    icon: 'lucide:globe',
     title: 'Open & Transparent',
     description: 'On-chain settlement means every transaction is verifiable. Event sourcing ensures a complete, immutable audit trail.',
   },
   {
-    icon: '♿',
+    icon: 'lucide:accessibility',
     title: 'Accessible to All',
-    description: 'WCAG 2 AA compliant. We build for everyone — regardless of ability, device, or connection speed.',
+    description: 'WCAG 2 AA compliant. We build for everyone, regardless of ability, device, or connection speed.',
   },
 ]
 
@@ -127,8 +129,15 @@ const numbers = [
   gap: 0.75rem;
 }
 
-.about-values__icon {
-  font-size: 1.75rem;
+.about-values__icon-wrap {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-icon);
+  background: rgba(255, 255, 255, 0.05);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255, 255, 255, 0.6);
 }
 
 .about-values__card p {

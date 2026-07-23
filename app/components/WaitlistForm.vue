@@ -20,8 +20,8 @@
         />
       </div>
 
-      <!-- Turnstile widget (managed mode — invisible for most users) -->
-      <div ref="turnstileRef" class="waitlist-form__turnstile" />
+      <!-- Turnstile widget (invisible mode — hidden from UI) -->
+      <div ref="turnstileRef" style="display: none;" />
 
       <button type="submit" class="btn btn-primary" style="width: 100%" :disabled="loading || !agreed || !turnstileToken">
         <span v-if="loading" class="waitlist-form__spinner" />
@@ -42,7 +42,9 @@
 
     <!-- Success State -->
     <div v-else class="waitlist-form__success">
-      <div class="waitlist-form__success-icon">✓</div>
+      <div class="waitlist-form__success-icon">
+        <Icon name="lucide:check" size="20" />
+      </div>
       <h3>You're on the list!</h3>
       <p>We'll send you an invitation when your spot opens up.</p>
     </div>

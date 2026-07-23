@@ -28,22 +28,27 @@
           </button>
           <Transition name="dropdown-fade">
             <div v-if="openDropdown === group.label" class="navbar__dropdown-menu" role="menu">
-              <NuxtLink
+              <component
+                :is="item.comingSoon ? 'div' : NuxtLink"
                 v-for="item in group.items"
-                :key="item.to"
-                :to="item.to"
-                :target="item.external ? '_blank' : undefined"
-                :rel="item.external ? 'noopener noreferrer' : undefined"
+                :key="item.label"
+                v-bind="item.comingSoon ? {} : { to: item.to, target: item.external ? '_blank' : undefined, rel: item.external ? 'noopener noreferrer' : undefined }"
                 class="navbar__dropdown-item"
+                :class="{ 'navbar__dropdown-item--disabled': item.comingSoon }"
                 role="menuitem"
-                @click="openDropdown = null"
+                @click="!item.comingSoon && (openDropdown = null)"
               >
-                <span class="navbar__dropdown-icon">{{ item.icon }}</span>
+                <span class="navbar__dropdown-icon">
+                  <Icon :name="item.icon" size="16" />
+                </span>
                 <div>
-                  <span class="navbar__dropdown-label">{{ item.label }}</span>
+                  <span class="navbar__dropdown-label">
+                    {{ item.label }}
+                    <span v-if="item.comingSoon" class="navbar__coming-soon-pill">Coming Soon</span>
+                  </span>
                   <span v-if="item.desc" class="navbar__dropdown-desc">{{ item.desc }}</span>
                 </div>
-              </NuxtLink>
+              </component>
             </div>
           </Transition>
         </li>
@@ -99,16 +104,18 @@
           </button>
           <Transition name="accordion">
             <ul v-if="mobileExpanded === group.label" class="navbar__mobile-links">
-              <li v-for="item in group.items" :key="item.to">
-                <NuxtLink
-                  :to="item.to"
-                  :target="item.external ? '_blank' : undefined"
+              <li v-for="item in group.items" :key="item.label">
+                <component
+                  :is="item.comingSoon ? 'div' : NuxtLink"
+                  v-bind="item.comingSoon ? {} : { to: item.to, target: item.external ? '_blank' : undefined }"
                   class="navbar__mobile-link"
-                  @click="isMobileOpen = false"
+                  :class="{ 'navbar__mobile-link--disabled': item.comingSoon }"
+                  @click="!item.comingSoon && (isMobileOpen = false)"
                 >
-                  <span>{{ item.icon }}</span>
+                  <Icon :name="item.icon" size="16" />
                   {{ item.label }}
-                </NuxtLink>
+                  <span v-if="item.comingSoon" class="navbar__coming-soon-pill">Coming Soon</span>
+                </component>
               </li>
             </ul>
           </Transition>
@@ -128,16 +135,20 @@
 
 <script setup lang="ts">
 /**
- * NavBar v2 — Mega-menu dropdown navigation with institutional feel.
+ * NavBar v3 — Mega-menu dropdown navigation with Lucide icons.
  * Glass blur effect on scroll. Accordion mobile menu.
+ * Coming Soon pills for disabled items (Security, Docs, Careers).
  * Offset by 40px when announcement banner is visible.
  */
+const NuxtLink = resolveComponent('NuxtLink')
+
 interface NavItem {
   to: string
   label: string
   icon: string
   desc?: string
   external?: boolean
+  comingSoon?: boolean
 }
 
 interface NavGroup {
@@ -149,31 +160,38 @@ const navGroups: NavGroup[] = [
   {
     label: 'Solutions',
     items: [
-      { to: '/product', label: 'Product', icon: '◆', desc: 'Settlement infrastructure overview' },
-      { to: '/for-desks', label: 'For Desks', icon: '🏢', desc: 'White-label for trading desks' },
+      { to: '/product', label: 'Platform Overview', icon: 'lucide:layers', desc: 'Settlement infrastructure overview' },
+      { to: '/for-institutions', label: 'For Institutions', icon: 'lucide:building-2', desc: 'White-label for banks, desks & funds' },
     ],
   },
   {
-    label: 'Community',
+    label: 'Labs',
     items: [
-      { to: 'https://github.com/DeFlowLabs', label: 'GitHub', icon: '💻', external: true },
-      { to: 'https://x.com/DeFlowLabs', label: 'X / Twitter', icon: '𝕏', external: true },
-      { to: 'https://linkedin.com/company/deflowlabs', label: 'LinkedIn', icon: '🔗', external: true },
+      { to: '/labs', label: 'Research & AI', icon: 'lucide:flask-conical', desc: 'R&D, AI, and open-source' },
+      { to: '/blog', label: 'Blog', icon: 'lucide:newspaper', desc: 'News & engineering insights' },
     ],
   },
   {
     label: 'Resources',
     items: [
-      { to: '/blog', label: 'Blog', icon: '📰', desc: 'News & engineering insights' },
-      { to: '/labs', label: 'Labs', icon: '🔬', desc: 'Research & open-source' },
-      { to: '/security', label: 'Security', icon: '🛡️', desc: 'Audits, compliance & trust' },
+      { to: '/docs', label: 'Documentation', icon: 'lucide:book-open', desc: 'Guides, API reference & SDKs', comingSoon: true },
+      { to: '/security', label: 'Security', icon: 'lucide:shield-check', desc: 'Audits, compliance & trust', comingSoon: true },
     ],
   },
   {
-    label: 'Company',
+    label: 'Community',
     items: [
-      { to: '/about', label: 'About', icon: '🏛️', desc: 'Mission & team' },
-      { to: '/contact', label: 'Contact', icon: '✉️', desc: 'Get in touch' },
+      { to: 'https://github.com/DeFlowLabs', label: 'GitHub', icon: 'lucide:github', external: true },
+      { to: 'https://x.com/DeFlowLabs', label: 'X / Twitter', icon: 'lucide:twitter', external: true },
+      { to: 'https://linkedin.com/company/deflowlabs', label: 'LinkedIn', icon: 'lucide:linkedin', external: true },
+    ],
+  },
+  {
+    label: 'About',
+    items: [
+      { to: '/about', label: 'Company', icon: 'lucide:landmark', desc: 'Mission & team' },
+      { to: '/contact', label: 'Contact', icon: 'lucide:mail', desc: 'Get in touch' },
+      { to: '/careers', label: 'Careers', icon: 'lucide:briefcase', desc: 'Join the team', comingSoon: true },
     ],
   },
 ]
@@ -315,7 +333,7 @@ watch(() => route.path, () => {
   top: 100%;
   left: 50%;
   transform: translateX(-50%);
-  min-width: 260px;
+  min-width: 280px;
   padding: 0.5rem;
   margin-top: 0.5rem;
   background: rgba(18, 18, 28, 0.98);
@@ -334,20 +352,30 @@ watch(() => route.path, () => {
   text-decoration: none;
   border-radius: 0.5rem;
   transition: background 0.15s ease;
+  cursor: pointer;
 }
 
 .navbar__dropdown-item:hover {
   background: rgba(255, 255, 255, 0.06);
 }
 
+.navbar__dropdown-item--disabled {
+  opacity: 0.45;
+  cursor: default;
+  pointer-events: none;
+}
+
 .navbar__dropdown-icon {
   font-size: 1rem;
   line-height: 1.4;
   flex-shrink: 0;
+  color: rgba(255, 255, 255, 0.6);
 }
 
 .navbar__dropdown-label {
-  display: block;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
   font-size: 0.8125rem;
   font-weight: 500;
   color: rgba(255, 255, 255, 0.9);
@@ -360,20 +388,27 @@ watch(() => route.path, () => {
   margin-top: 0.125rem;
 }
 
+/* Coming Soon Pill */
+.navbar__coming-soon-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.0625rem 0.375rem;
+  font-size: 0.5625rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #A78BFA;
+  background: rgba(139, 92, 246, 0.12);
+  border: 1px solid rgba(139, 92, 246, 0.2);
+  border-radius: 9999px;
+  white-space: nowrap;
+}
+
 /* CTAs */
 .navbar__actions {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-}
-
-.btn-sm {
-  min-height: 2.25rem;
-  padding: 0.375rem 1rem;
-  font-size: 13px;
-  display: flex;
-  align-items: center;
-  gap: 0.25rem;
 }
 
 /* Mobile Toggle */
@@ -461,6 +496,11 @@ watch(() => route.path, () => {
 .navbar__mobile-link:hover {
   background: rgba(255, 255, 255, 0.05);
   color: #FFFFFF;
+}
+
+.navbar__mobile-link--disabled {
+  opacity: 0.45;
+  pointer-events: none;
 }
 
 .navbar__mobile-ctas {

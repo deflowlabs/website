@@ -30,7 +30,7 @@
               aria-label="Subscribe to newsletter"
             >
               <span v-if="subscribing">...</span>
-              <span v-else-if="subscribed">✓</span>
+              <span v-else-if="subscribed"><Icon name="lucide:check" size="16" /></span>
               <svg v-else width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="m5 12 14 0" /><path d="m13 18 6-6-6-6" />
               </svg>
@@ -61,9 +61,8 @@
       <div class="footer__column">
         <h3 class="footer__heading">Solutions</h3>
         <ul class="footer__list">
-          <li><NuxtLink to="/product">Product</NuxtLink></li>
-          <li><NuxtLink to="/for-desks">For Desks</NuxtLink></li>
-          <li><NuxtLink to="/security">Security</NuxtLink></li>
+          <li><NuxtLink to="/product">Platform Overview</NuxtLink></li>
+          <li><NuxtLink to="/for-institutions">For Institutions</NuxtLink></li>
         </ul>
       </div>
 
@@ -78,11 +77,11 @@
         </ul>
       </div>
 
-      <!-- Company Column -->
+      <!-- About Column -->
       <div class="footer__column">
-        <h3 class="footer__heading">Company</h3>
+        <h3 class="footer__heading">About</h3>
         <ul class="footer__list">
-          <li><NuxtLink to="/about">About</NuxtLink></li>
+          <li><NuxtLink to="/about">Company</NuxtLink></li>
           <li><NuxtLink to="/contact">Contact</NuxtLink></li>
         </ul>
       </div>

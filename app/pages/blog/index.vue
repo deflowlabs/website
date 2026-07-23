@@ -117,7 +117,7 @@
 
         <!-- Empty State -->
         <div v-if="!displayedArticles.length && !loading" class="blog-empty glass-card">
-          <span class="blog-empty__icon">📝</span>
+          <span class="blog-empty__icon"><Icon name="lucide:file-text" size="32" /></span>
           <h3 v-if="searchQuery">No articles found</h3>
           <h3 v-else>Coming Soon</h3>
           <p v-if="searchQuery">Try a different search term or browse all categories.</p>

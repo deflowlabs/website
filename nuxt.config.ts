@@ -90,7 +90,7 @@ export default defineNuxtConfig({
       '/blog',
       '/contact',
       '/waitlist',
-      '/for-desks',
+      '/for-institutions',
       '/security',
       '/legal/terms',
       '/legal/privacy',
