@@ -64,6 +64,11 @@ export default defineNuxtConfig({
     'nuxt-og-image',
   ],
 
+  // Site URL — required by sitemap and og-image modules during prerender
+  site: {
+    url: 'https://deflowlabs.io',
+  },
+
   // Icon configuration — Lucide icons for Atmospheric Institutional design
   icon: {
     serverBundle: 'local',
@@ -118,6 +123,7 @@ export default defineNuxtConfig({
     resendApiKey: process.env.RESEND_API_KEY || '',
     contactEmail: process.env.CONTACT_EMAIL || 'contact@deflowlabs.io',
     piiSaltSecret: process.env.PII_SALT_SECRET || '',
+    postgresUrl: process.env.POSTGRES_URL || '',
     public: {
       // Client-accessible
       turnstileSiteKey: process.env.NUXT_PUBLIC_TURNSTILE_SITE_KEY || '',
@@ -127,19 +133,19 @@ export default defineNuxtConfig({
     },
   },
 
-  // Route rules for performance
+  // Route rules for performance — ISR on Vercel (no build-time prerendering required)
   routeRules: {
-    '/': { prerender: true },
-    '/product': { prerender: true },
-    '/about': { prerender: true },
-    '/labs': { isr: 3600 }, // Revalidate every hour (Sanity content)
-    '/blog': { isr: 600 }, // Revalidate every 10 min
+    '/': { isr: 3600 },
+    '/product': { isr: 3600 },
+    '/about': { isr: 3600 },
+    '/labs': { isr: 3600 },
+    '/blog': { isr: 600 },
     '/blog/**': { isr: 3600 },
-    '/legal/**': { prerender: true },
-    '/waitlist': { prerender: true },
-    '/for-desks': { prerender: true },
-    '/security': { prerender: true },
-    '/rss.xml': { isr: 600 }, // RSS feed, revalidate every 10 min
+    '/legal/**': { isr: 86400 },
+    '/waitlist': { isr: 3600 },
+    '/for-institutions': { isr: 3600 },
+    '/security': { isr: 3600 },
+    '/rss.xml': { isr: 600 },
   },
 
   // Vite configuration — Tailwind v4 plugin + exclude React deps

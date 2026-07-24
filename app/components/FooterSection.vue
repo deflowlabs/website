@@ -11,35 +11,7 @@
           The institutional settlement layer for digital asset dealflows.
         </p>
 
-        <!-- Newsletter Signup -->
-        <form class="footer__newsletter" @submit.prevent="subscribe">
-          <div class="footer__newsletter-input-wrap">
-            <input
-              v-model="email"
-              type="email"
-              placeholder="Your email"
-              aria-label="Newsletter email"
-              class="footer__newsletter-input"
-              :disabled="subscribed"
-              required
-            />
-            <button
-              type="submit"
-              class="footer__newsletter-btn"
-              :disabled="subscribing || subscribed"
-              aria-label="Subscribe to newsletter"
-            >
-              <span v-if="subscribing">...</span>
-              <span v-else-if="subscribed"><Icon name="lucide:check" size="16" /></span>
-              <svg v-else width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="m5 12 14 0" /><path d="m13 18 6-6-6-6" />
-              </svg>
-            </button>
-          </div>
-          <p v-if="message" class="footer__newsletter-msg" :class="{ 'footer__newsletter-msg--error': isError }">
-            {{ message }}
-          </p>
-        </form>
+
 
         <div class="footer__social">
           <a href="https://linkedin.com/company/deflowlabs" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">
@@ -113,42 +85,10 @@
 
 <script setup lang="ts">
 /**
- * FooterSection v2 — 5-column footer with newsletter signup, social links,
+ * FooterSection v2 — 5-column footer with social links,
  * structured navigation, and legal links.
  */
 const currentYear = new Date().getFullYear()
-
-const email = ref('')
-const subscribing = ref(false)
-const subscribed = ref(false)
-const message = ref('')
-const isError = ref(false)
-
-/**
- * Subscribe to newsletter via Zero-PII endpoint.
- * Hashes email server-side, stores only the hash.
- */
-async function subscribe() {
-  if (!email.value || subscribing.value || subscribed.value) return
-  subscribing.value = true
-  message.value = ''
-  isError.value = false
-
-  try {
-    const res = await $fetch<{ success: boolean; message: string }>('/api/newsletter', {
-      method: 'POST',
-      body: { email: email.value },
-    })
-    message.value = res.message
-    subscribed.value = true
-    email.value = ''
-  } catch (err: any) {
-    isError.value = true
-    message.value = err.data?.message || 'Something went wrong. Please try again.'
-  } finally {
-    subscribing.value = false
-  }
-}
 </script>
 
 <style scoped>
@@ -200,76 +140,7 @@ async function subscribe() {
   line-height: 1.6;
 }
 
-/* Newsletter */
-.footer__newsletter {
-  margin-top: 0.25rem;
-}
 
-.footer__newsletter-input-wrap {
-  display: flex;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: var(--radius-card);
-  overflow: hidden;
-  transition: border-color 0.2s ease;
-}
-
-.footer__newsletter-input-wrap:focus-within {
-  border-color: rgba(255, 255, 255, 0.2);
-}
-
-.footer__newsletter-input {
-  flex: 1;
-  padding: 0.5rem 0.75rem;
-  background: rgba(255, 255, 255, 0.04);
-  border: none;
-  color: var(--color-foreground);
-  font-size: 0.8125rem;
-  font-family: var(--font-primary);
-  outline: none;
-  min-width: 0;
-}
-
-.footer__newsletter-input::placeholder {
-  color: rgba(255, 255, 255, 0.25);
-}
-
-.footer__newsletter-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0.5rem 0.75rem;
-  background: rgba(255, 255, 255, 0.06);
-  border: none;
-  border-left: 1px solid rgba(255, 255, 255, 0.08);
-  color: rgba(255, 255, 255, 0.6);
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.footer__newsletter-btn:hover:not(:disabled) {
-  background: rgba(255, 255, 255, 0.1);
-  color: #FFFFFF;
-}
-
-.footer__newsletter-btn:disabled {
-  opacity: 0.5;
-  cursor: default;
-}
-
-.footer__newsletter-btn:focus-visible {
-  outline: 2px solid var(--color-ring);
-  outline-offset: -2px;
-}
-
-.footer__newsletter-msg {
-  font-size: 0.6875rem;
-  margin-top: 0.375rem;
-  color: #22C55E;
-}
-
-.footer__newsletter-msg--error {
-  color: #EF4444;
-}
 
 /* Social */
 .footer__social {

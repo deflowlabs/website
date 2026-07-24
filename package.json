@@ -12,6 +12,7 @@
     "typecheck": "nuxt typecheck"
   },
   "dependencies": {
+    "@neondatabase/serverless": "^1.1.0",
     "@nuxt/fonts": "^0.14.0",
     "@nuxt/icon": "^2.3.1",
     "@nuxt/image": "^2.0.0",

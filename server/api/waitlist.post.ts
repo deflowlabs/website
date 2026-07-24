@@ -3,16 +3,14 @@
  *
  * Handles waitlist signups with Cloudflare Turnstile bot verification.
  * Validates email format, verifies Turnstile token, and stores a
- * HMAC-SHA256 hashed version of the email. Zero-PII: raw email is never persisted.
+ * HMAC-SHA256 hashed version of the email in Vercel Postgres (Neon).
+ * Zero-PII: raw email is never persisted.
  *
  * @param body.email - User's email address (hashed before storage)
  * @param body.turnstileToken - Cloudflare Turnstile verification token
  */
 import { createHmac } from 'node:crypto'
-
-// TODO: Replace with Drizzle query on `waitlist_signups` table when DB is connected.
-// In-memory store for development — resets on server restart.
-export const waitlistStore: Set<string> = new Set()
+import { ensureWaitlistTable, useDb } from '../utils/db'
 
 export default defineEventHandler(async (event) => {
   const body = await readBody<{ email: string; turnstileToken: string }>(event)
@@ -62,16 +60,31 @@ export default defineEventHandler(async (event) => {
     .update(body.email.toLowerCase().trim())
     .digest('hex')
 
-  // Check for duplicates
-  if (waitlistStore.has(hashedEmail)) {
+  // Ensure table exists (idempotent, cached after first call)
+  await ensureWaitlistTable()
+
+  // Insert into Vercel Postgres (Neon) — UNIQUE constraint handles dedup
+  try {
+    const sql = useDb()
+    await sql`
+      INSERT INTO waitlist_signups (email_hash, source)
+      VALUES (${hashedEmail}, 'website')
+    `
+  }
+  catch (err: unknown) {
+    // PostgreSQL error code 23505 = unique_violation (duplicate email hash)
+    if (err && typeof err === 'object' && 'code' in err && err.code === '23505') {
+      throw createError({
+        statusCode: 409,
+        message: 'You\'re already on the waitlist!',
+      })
+    }
+    console.error('[Waitlist] Database error:', err)
     throw createError({
-      statusCode: 409,
-      message: 'You\'re already on the waitlist!',
+      statusCode: 500,
+      message: 'Something went wrong. Please try again later.',
     })
   }
-
-  // Store hashed email
-  waitlistStore.add(hashedEmail)
 
   return {
     success: true,

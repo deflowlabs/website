@@ -126,12 +126,10 @@ export default defineEventHandler(async (event) => {
     }
   }
   else {
-    // Development fallback
-    console.log('[Contact] Form submission:', {
-      name: body.name,
+    // Development fallback — no PII logged
+    console.log('[Contact] Form submission received:', {
       type: body.type,
-      company: body.company,
-      message: body.message.substring(0, 100),
+      messageLength: body.message.length,
     })
   }
 
