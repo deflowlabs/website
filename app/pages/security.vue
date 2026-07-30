@@ -76,7 +76,7 @@
       <div class="container">
         <div class="section-header">
           <span class="badge badge-warning">Smart Contracts</span>
-          <h2>Audited & battle-tested</h2>
+          <h2>Rigorously tested</h2>
           <p>Our Solidity contracts are verified through multiple layers of automated and manual analysis.</p>
         </div>
         <div class="sec-grid">
@@ -190,12 +190,14 @@ useHead({
   ],
 })
 
+useCanonical()
+
 useStructuredData(ORGANIZATION_SCHEMA)
 
 const audits = [
   { icon: 'lucide:search-code', title: 'Static Analysis', desc: 'Automated analysis for common Solidity vulnerabilities, reentrancy, and gas optimization issues.' },
   { icon: 'lucide:test-tubes', title: 'Fuzz Testing', desc: 'Property-based fuzz testing with millions of random inputs to find edge cases.' },
-  { icon: 'lucide:square-function', title: 'Formal Verification', desc: 'Mathematical proofs for critical invariants in escrow and fee distribution contracts.' },
+  { icon: 'lucide:square-function', title: 'Invariant Testing', desc: 'Property-based invariant checks for critical escrow and fee distribution contract logic.' },
   { icon: 'lucide:lock', title: 'Access Control Audit', desc: 'Role separation with multi-sig requirements for administrative functions.' },
 ]
 

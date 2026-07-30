@@ -149,6 +149,8 @@ useHead({
   ],
 })
 
+useCanonical()
+
 const categories = ['All', 'Product', 'Research', 'Engineering', 'Ecosystem', 'Company']
 const activeCategory = ref('All')
 const searchQuery = ref('')

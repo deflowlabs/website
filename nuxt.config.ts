@@ -57,6 +57,7 @@ export default defineNuxtConfig({
   css: ['~/assets/css/main.css'],
 
   modules: [
+    '@nuxt/eslint',
     '@nuxt/icon',
     '@nuxt/image',
     '@nuxt/fonts',
@@ -85,7 +86,6 @@ export default defineNuxtConfig({
 
   // Sitemap configuration — static + dynamic blog routes from Sanity
   sitemap: {
-    siteUrl: 'https://deflowlabs.io',
     zeroRuntime: true,
     urls: [
       '/',
@@ -111,9 +111,7 @@ export default defineNuxtConfig({
 
   // Dynamic OG image generation
   ogImage: {
-    defaults: {
-      component: 'OgImageBlog',
-    },
+    enabled: true,
   },
 
   // Runtime configuration
@@ -146,6 +144,8 @@ export default defineNuxtConfig({
     '/for-institutions': { isr: 3600 },
     '/security': { isr: 3600 },
     '/rss.xml': { isr: 600 },
+    // DFL-032: Redirect intuitive alias to canonical route
+    '/institutions': { redirect: { to: '/for-institutions', statusCode: 301 } },
   },
 
   // Vite configuration — Tailwind v4 plugin + exclude React deps
@@ -161,6 +161,17 @@ export default defineNuxtConfig({
 
   // Nitro server configuration
   nitro: {
-    preset: 'vercel', // Change to 'cloudflare-pages' if using CF
+    preset: 'vercel',
+    // DFL-010: Security headers — remove framework fingerprint, add defense-in-depth
+    routeRules: {
+      '/**': {
+        headers: {
+          'X-Frame-Options': 'DENY',
+          'X-Content-Type-Options': 'nosniff',
+          'Referrer-Policy': 'strict-origin-when-cross-origin',
+          'Permissions-Policy': 'camera=(), microphone=(), geolocation=()',
+        },
+      },
+    },
   },
 })

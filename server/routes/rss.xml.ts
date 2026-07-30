@@ -8,7 +8,7 @@
  */
 import { createClient } from '@sanity/client'
 
-const RSS_QUERY = `*[_type == "post"] | order(publishedAt desc) [0...50] {
+const RSS_QUERY = `*[_type == "post" && defined(publishedAt)] | order(publishedAt desc) [0...50] {
   title,
   "slug": slug.current,
   excerpt,

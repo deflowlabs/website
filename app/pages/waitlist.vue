@@ -27,6 +27,8 @@ useHead({
   ],
 })
 
+useCanonical()
+
 const currentYear = new Date().getFullYear()
 </script>
 

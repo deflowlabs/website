@@ -105,6 +105,7 @@
 
         <div class="deal-types__grid">
           <div v-for="dt in dealTypes" :key="dt.title" class="deal-types__card glass-card">
+            <div v-if="dt.comingSoon" class="deal-types__coming-soon">Coming Soon</div>
             <div class="deal-types__icon" :style="{ background: dt.iconBg }">
               <Icon :name="dt.icon" size="20" />
             </div>
@@ -233,6 +234,8 @@ useHead({
   title: 'DeFlow Labs — Institutional Settlement Layer for Digital Asset Dealflows',
 })
 
+useCanonical()
+
 useStructuredData(ORGANIZATION_SCHEMA)
 useStructuredData(WEBSITE_SCHEMA)
 
@@ -242,7 +245,7 @@ const heroStats = [
   { value: '5', label: 'Deal Types' },
   { value: '0', label: 'PII Stored' },
   { value: '$25K+', label: 'Min Deal Size' },
-  { value: '< 15 min', label: 'Settlement' },
+  { value: '24/7', label: 'Settlement' },
 ]
 
 const dealTypes = [
@@ -263,18 +266,21 @@ const dealTypes = [
     iconBg: 'rgba(245, 158, 11, 0.1)',
     title: 'RWA Tokenization',
     description: 'Settlement for real-world-asset-to-token conversions with compliance-verified provenance.',
+    comingSoon: true,
   },
   {
     icon: 'lucide:briefcase',
     iconBg: 'rgba(16, 185, 129, 0.1)',
     title: 'PE Secondaries',
     description: 'Private equity position transfers with identity verification and audit trails.',
+    comingSoon: true,
   },
   {
     icon: 'lucide:layers',
     iconBg: 'rgba(236, 72, 153, 0.1)',
     title: 'Structured Products',
     description: 'Complex multi-party dealflows with custom terms, escrow conditions, and settlement logic.',
+    comingSoon: true,
   },
 ]
 
@@ -328,7 +334,7 @@ const steps = [
 const securityFeatures = [
   'Non-custodial. We never hold your assets.',
   'Zero-PII. No personal data in our database.',
-  'Smart contracts audited with rigorous security testing',
+  'Smart contracts rigorously tested with automated security analysis',
   'Identity verification with sanctions screening',
   'Deterministic on-chain finality',
   'Wallet risk analysis (OFAC, EU, UN)',
@@ -575,12 +581,31 @@ const securityFeatures = [
 }
 
 .deal-types__card {
+  position: relative;
   padding: 1.5rem;
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
   text-align: center;
   transition: all 0.3s ease;
+}
+
+.deal-types__coming-soon {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  display: inline-flex;
+  align-items: center;
+  padding: 0.125rem 0.5rem;
+  font-size: 0.5625rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #A78BFA;
+  background: rgba(139, 92, 246, 0.12);
+  border: 1px solid rgba(139, 92, 246, 0.2);
+  border-radius: 9999px;
+  white-space: nowrap;
 }
 
 .deal-types__card:hover {

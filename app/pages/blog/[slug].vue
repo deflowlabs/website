@@ -17,9 +17,6 @@
               <span>{{ formatDate(article.publishedAt) }}</span>
             </div>
           </template>
-          <template v-else>
-            <h1>Article not found</h1>
-          </template>
         </div>
       </div>
     </section>
@@ -37,13 +34,10 @@
             </p>
           </div>
 
-          <!-- Fallback for placeholder articles -->
-          <template v-else>
-            <p>{{ article.excerpt }}</p>
-            <p style="color: rgba(255,255,255,0.5); font-style: italic; margin-top: 2rem">
-              Full article content will be published soon.
-            </p>
-          </template>
+          <!-- No body content yet -->
+          <p v-else class="text-muted" style="font-style: italic; margin-top: 2rem">
+            Full article content will be published soon.
+          </p>
         </div>
       </div>
     </section>
@@ -54,7 +48,7 @@
 /**
  * Single blog article page.
  * Fetches full article by slug from Sanity CMS via GROQ.
- * Falls back to slug-derived title for placeholder articles.
+ * Returns 404 for unknown/unpublished slugs.
  */
 import { POST_BY_SLUG_QUERY } from '~/utils/sanity-queries'
 
@@ -66,17 +60,16 @@ const { data: sanityArticle } = await useAsyncData(`post-${slug}`, () =>
   sanityFetch(POST_BY_SLUG_QUERY, { slug }),
 )
 
-// Fallback for when Sanity has no content
-const fallbackArticle = {
-  title: slug.replace(/-/g, ' ').replace(/\b\w/g, (c: string) => c.toUpperCase()),
-  excerpt: 'This article is coming soon. Full content will be published shortly.',
-  category: 'Product',
-  author: { name: 'DeFlow Labs' },
-  publishedAt: null,
-  body: null,
+// Return a proper 404 for unknown slugs instead of fabricating content (DFL-015)
+if (!sanityArticle.value) {
+  throw createError({
+    statusCode: 404,
+    statusMessage: 'Article not found',
+    fatal: true,
+  })
 }
 
-const article = computed(() => sanityArticle.value || fallbackArticle)
+const article = computed(() => sanityArticle.value)
 
 useHead({
   title: `${article.value.title} — DeFlow Labs Blog`,
@@ -88,17 +81,17 @@ useHead({
   ],
 })
 
-defineOgImage({
-  component: 'OgImageBlog',
-  title: article.value.title,
-  category: article.value.category || 'Product',
-  author: article.value.author?.name || 'DeFlow Labs',
-  date: article.value.publishedAt
-    ? new Date(article.value.publishedAt).toLocaleDateString('en-US', {
-        year: 'numeric', month: 'long', day: 'numeric',
-      })
-    : undefined,
-})
+useCanonical()
+
+// Per-article OG image (falls back to global og-image.png from nuxt.config)
+if (article.value.coverImage) {
+  useHead({
+    meta: [
+      { property: 'og:image', content: article.value.coverImage },
+      { name: 'twitter:image', content: article.value.coverImage },
+    ],
+  })
+}
 
 useStructuredData(createBlogPostSchema({
   title: article.value.title,

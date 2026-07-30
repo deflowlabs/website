@@ -4,7 +4,7 @@
  */
 
 /** Fetch all published blog posts, ordered by date descending. */
-export const POSTS_QUERY = `*[_type == "post"] | order(publishedAt desc) {
+export const POSTS_QUERY = `*[_type == "post" && defined(publishedAt)] | order(publishedAt desc) {
   _id,
   title,
   "slug": slug.current,
@@ -22,7 +22,7 @@ export const POSTS_QUERY = `*[_type == "post"] | order(publishedAt desc) {
  * Fetch the featured blog post (flagged isFeatured, or latest as fallback).
  * GROQ sorts featured=true first, then by date. Picks [0].
  */
-export const FEATURED_POST_QUERY = `*[_type == "post"] | order(isFeatured desc, publishedAt desc)[0] {
+export const FEATURED_POST_QUERY = `*[_type == "post" && defined(publishedAt)] | order(isFeatured desc, publishedAt desc)[0] {
   _id,
   title,
   "slug": slug.current,
@@ -39,7 +39,7 @@ export const FEATURED_POST_QUERY = `*[_type == "post"] | order(isFeatured desc, 
  * Fetch paginated blog posts (excluding featured), ordered by date descending.
  * Params: $start (number), $end (number), $featuredId (string, optional)
  */
-export const PAGINATED_POSTS_QUERY = `*[_type == "post" && _id != $featuredId] | order(publishedAt desc) [$start...$end] {
+export const PAGINATED_POSTS_QUERY = `*[_type == "post" && defined(publishedAt) && _id != $featuredId] | order(publishedAt desc) [$start...$end] {
   _id,
   title,
   "slug": slug.current,
@@ -53,10 +53,10 @@ export const PAGINATED_POSTS_QUERY = `*[_type == "post" && _id != $featuredId] |
 }`
 
 /** Count all non-featured posts (for pagination total). */
-export const NON_FEATURED_COUNT_QUERY = `count(*[_type == "post" && _id != $featuredId])`
+export const NON_FEATURED_COUNT_QUERY = `count(*[_type == "post" && defined(publishedAt) && _id != $featuredId])`
 
 /** Fetch a single blog post by slug with full body content. */
-export const POST_BY_SLUG_QUERY = `*[_type == "post" && slug.current == $slug][0] {
+export const POST_BY_SLUG_QUERY = `*[_type == "post" && defined(publishedAt) && slug.current == $slug][0] {
   _id,
   title,
   "slug": slug.current,
@@ -89,7 +89,7 @@ export const LABS_PROJECTS_QUERY = `*[_type == "labsProject"] | order(status asc
 }`
 
 /** Fetch total post count (for pagination). */
-export const POST_COUNT_QUERY = `count(*[_type == "post"])`
+export const POST_COUNT_QUERY = `count(*[_type == "post" && defined(publishedAt)])`
 
 /** Fetch all post slugs for sitemap and RSS generation. */
-export const POST_SLUGS_QUERY = `*[_type == "post"]{ "slug": slug.current, publishedAt, _updatedAt }`
+export const POST_SLUGS_QUERY = `*[_type == "post" && defined(publishedAt)]{ "slug": slug.current, publishedAt, _updatedAt }`

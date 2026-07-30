@@ -104,6 +104,8 @@ useHead({
   ],
 })
 
+useCanonical()
+
 const inquiryTypes = [
   'General Inquiry',
   'Partnership / Integration',

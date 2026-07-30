@@ -8,8 +8,8 @@
             <span class="badge badge-premium">DeFlow Labs</span>
             <h1>Where finance meets<br />frontier research</h1>
             <p>
-              DeFlow Labs is the R&amp;D arm of DeFlow Labs, Inc. We collaborate with
-              top universities and PhD researchers to advance digital asset
+              DeFlow Labs is the R&amp;D arm of DeFlow Labs, Inc. We are building
+              partnerships with academic institutions to advance digital asset
               infrastructure, AI-driven compliance, and settlement technology.
             </p>
             <!-- FCT Recognition -->
@@ -18,7 +18,7 @@
               <div>
                 <span class="labs-hero__recognition-title">Recognized R&amp;D Institution</span>
                 <span class="labs-hero__recognition-desc">
-                  Officially recognized as an "Instituição de I&amp;D" by FCT
+                  Applied for recognition as an "Instituição de I&amp;D" by FCT
                   (Fundação para a Ciência e a Tecnologia), one of Portugal's
                   leading science foundations.
                 </span>
@@ -126,9 +126,11 @@ import { LABS_PROJECTS_QUERY } from '~/utils/sanity-queries'
 useHead({
   title: 'Labs — DeFlow Labs',
   meta: [
-    { name: 'description', content: 'DeFlow Labs R&D — officially recognized by FCT. Collaborating with universities on AI, settlement research, and compliance innovation.' },
+    { name: 'description', content: 'DeFlow Labs R&D — exploring academic partnerships in AI, settlement research, and compliance innovation.' },
   ],
 })
+
+useCanonical()
 
 const { sanityFetch } = useSanity()
 const { data: sanityProjects } = await useAsyncData('labs-projects', () =>

@@ -68,6 +68,8 @@ useHead({
   ],
 })
 
+useCanonical()
+
 const values = [
   {
     icon: 'lucide:lock',
@@ -77,7 +79,7 @@ const values = [
   {
     icon: 'lucide:eye-off',
     title: 'Privacy First',
-    description: 'Zero-PII architecture means we verify your identity without ever storing your personal data. What we don\'t have, can\'t be breached.',
+    description: 'Zero-PII architecture means we verify your identity without storing personal data in our settlement systems. What we don\'t have, can\'t be breached.',
   },
   {
     icon: 'lucide:scale',
@@ -87,7 +89,7 @@ const values = [
   {
     icon: 'lucide:flask-conical',
     title: 'Research-Driven',
-    description: 'DeFlow Labs collaborates with top universities and PhD researchers. Our technology is grounded in academic rigor and peer-reviewed research.',
+    description: 'DeFlow Labs is exploring research collaborations with academic institutions and PhD researchers. Our technology is grounded in academic rigor.',
   },
   {
     icon: 'lucide:globe',
@@ -97,7 +99,7 @@ const values = [
   {
     icon: 'lucide:accessibility',
     title: 'Accessible to All',
-    description: 'WCAG 2 AA compliant. We build for everyone, regardless of ability, device, or connection speed.',
+    description: 'Working toward WCAG 2.2 AA. We build for everyone, regardless of ability, device, or connection speed.',
   },
 ]
 

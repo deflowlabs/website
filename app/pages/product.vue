@@ -88,16 +88,18 @@ useHead({
   ],
 })
 
+useCanonical()
+
 const deepFeatures = [
   {
     icon: 'lucide:lock',
     badge: 'Smart Escrow',
     badgeClass: 'badge-info',
     title: 'Programmable smart contract escrow',
-    description: 'Funds are locked in audited escrow contracts. No third party holds your assets. Release conditions are deterministic and verified on-chain.',
+    description: 'Funds are locked in rigorously tested escrow contracts. No third party holds your assets. Release conditions are deterministic and verified on-chain.',
     points: [
-      'Smart wallet accounts for gasless transactions',
-      'Audited escrow and fee routing contracts',
+      'Smart wallet accounts for simplified transactions',
+      'Rigorously tested escrow and fee routing contracts',
       'Rigorous smart contract security testing',
       'Deterministic on-chain finality',
     ],
@@ -146,10 +148,10 @@ const deepFeatures = [
 const securityItems = [
   { icon: 'lucide:lock', title: 'Non-Custodial', description: 'DeFlow never holds your assets. Smart contracts are the only custodians.' },
   { icon: 'lucide:eye-off', title: 'Zero-PII', description: 'No emails, names, or personal data in our database. Ever.' },
-  { icon: 'lucide:search-code', title: 'Audited Contracts', description: 'Static analysis and fuzz testing on every smart contract deployment.' },
+  { icon: 'lucide:search-code', title: 'Tested Contracts', description: 'Static analysis, fuzz testing, and invariant checks on every smart contract deployment.' },
   { icon: 'lucide:globe', title: 'Sanctions Screening', description: 'OFAC, EU, UN, OFSI watchlists with automatic refresh every 24 hours.' },
-  { icon: 'lucide:accessibility', title: 'WCAG 2 AA', description: 'Full accessibility compliance with automated testing on every build.' },
-  { icon: 'lucide:activity', title: 'Real-time Monitoring', description: '100% error tracking with privacy-preserving observability. No PII in logs.' },
+  { icon: 'lucide:accessibility', title: 'Accessibility', description: 'Working toward WCAG 2.2 AA compliance with automated testing on every build.' },
+  { icon: 'lucide:activity', title: 'Real-time Monitoring', description: 'Comprehensive error tracking with privacy-preserving observability. No PII in logs.' },
 ]
 </script>
 

@@ -11,7 +11,7 @@
             <span class="gradient-text">infrastructure</span>.
           </h1>
           <p>
-            Deploy a fully compliant settlement platform under your brand.
+            Deploy a compliance-ready settlement platform under your brand.
             Non-custodial escrow, identity verification, and revenue management
             for banks, desks, funds, and asset managers.
           </p>
@@ -107,9 +107,11 @@ import { useStructuredData, ORGANIZATION_SCHEMA } from '~/composables/useStructu
 useHead({
   title: 'For Institutions — DeFlow Labs',
   meta: [
-    { name: 'description', content: 'Deploy a fully compliant settlement platform under your brand. White-label infrastructure for banks, trading desks, funds, and asset managers.' },
+    { name: 'description', content: 'Deploy a compliance-ready settlement platform under your brand. White-label infrastructure for banks, trading desks, funds, and asset managers.' },
   ],
 })
+
+useCanonical()
 
 useStructuredData(ORGANIZATION_SCHEMA)
 
