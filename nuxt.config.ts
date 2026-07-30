@@ -62,10 +62,9 @@ export default defineNuxtConfig({
     '@nuxt/image',
     '@nuxt/fonts',
     '@nuxtjs/sitemap',
-    'nuxt-og-image',
   ],
 
-  // Site URL — required by sitemap and og-image modules during prerender
+  // Site URL — required by sitemap module during prerender
   site: {
     url: 'https://deflowlabs.io',
   },
@@ -107,11 +106,6 @@ export default defineNuxtConfig({
   image: {
     quality: 80,
     format: ['webp', 'avif'],
-  },
-
-  // Dynamic OG image generation
-  ogImage: {
-    enabled: true,
   },
 
   // Runtime configuration
