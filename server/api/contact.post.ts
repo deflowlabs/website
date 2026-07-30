@@ -14,6 +14,19 @@
  */
 
 /**
+ * Allowed inquiry types — validated server-side to prevent arbitrary values (DFL-026).
+ * Must stay in sync with the inquiryTypes array in contact.vue.
+ */
+const ALLOWED_INQUIRY_TYPES = [
+  'General Inquiry',
+  'Partnership / Integration',
+  'Investment / Business Development',
+  'Labs / Research Collaboration',
+  'Press / Media',
+  'Support',
+] as const
+
+/**
  * Escapes HTML special characters to prevent XSS in email templates.
  * @param str - Raw user input string
  * @returns Escaped string safe for HTML interpolation
@@ -45,6 +58,14 @@ export default defineEventHandler(async (event) => {
     throw createError({
       statusCode: 400,
       message: 'All required fields must be filled.',
+    })
+  }
+
+  // DFL-026: Validate inquiry type against allowed enum
+  if (!ALLOWED_INQUIRY_TYPES.includes(body.type as typeof ALLOWED_INQUIRY_TYPES[number])) {
+    throw createError({
+      statusCode: 400,
+      message: 'Invalid inquiry type.',
     })
   }
 

@@ -37,15 +37,15 @@
 
           <!-- Contact Form -->
           <div class="contact-form-wrapper glass-card">
-            <form v-if="!submitted" class="contact-form" @submit.prevent="handleSubmit">
+            <form v-if="!submitted" class="contact-form" @submit.prevent="handleSubmit" aria-label="Contact form">
               <div class="contact-form__field">
                 <label for="contact-name">Full Name *</label>
-                <input id="contact-name" v-model="form.name" type="text" required placeholder="John Doe" />
+                <input id="contact-name" v-model="form.name" type="text" required aria-required="true" placeholder="John Doe" />
               </div>
 
               <div class="contact-form__field">
                 <label for="contact-email">Email *</label>
-                <input id="contact-email" v-model="form.email" type="email" required placeholder="john@company.com" />
+                <input id="contact-email" v-model="form.email" type="email" required aria-required="true" placeholder="john@company.com" />
               </div>
 
               <div class="contact-form__field">
@@ -55,7 +55,7 @@
 
               <div class="contact-form__field">
                 <label for="contact-type">Inquiry Type *</label>
-                <select id="contact-type" v-model="form.type" required>
+                <select id="contact-type" v-model="form.type" required aria-required="true">
                   <option value="" disabled>Select inquiry type</option>
                   <option v-for="t in inquiryTypes" :key="t" :value="t">{{ t }}</option>
                 </select>
@@ -63,7 +63,7 @@
 
               <div class="contact-form__field">
                 <label for="contact-message">Message *</label>
-                <textarea id="contact-message" v-model="form.message" required rows="5" placeholder="Tell us more..." />
+                <textarea id="contact-message" v-model="form.message" required aria-required="true" rows="5" placeholder="Tell us more..." />
               </div>
 
               <!-- Turnstile widget (invisible mode — hidden from UI) -->
@@ -73,10 +73,10 @@
                 {{ loading ? 'Sending...' : 'Send Message' }}
               </button>
 
-              <p v-if="error" class="contact-form__error">{{ error }}</p>
+              <p v-if="error" class="contact-form__error" role="alert" aria-live="assertive">{{ error }}</p>
             </form>
 
-            <div v-else class="contact-form__success">
+            <div v-else class="contact-form__success" role="status" aria-live="polite">
               <div class="contact-form__success-icon">
                 <Icon name="lucide:check" size="20" />
               </div>

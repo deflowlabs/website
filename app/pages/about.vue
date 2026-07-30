@@ -114,6 +114,10 @@ const numbers = [
 </script>
 
 <style scoped>
+.about-page {
+  overflow-x: hidden;
+}
+
 .about-hero h1 {
   font-size: clamp(2rem, 4vw, 3rem);
 }
@@ -181,6 +185,17 @@ const numbers = [
 
   .about-numbers__grid {
     grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+  }
+}
+
+@media (max-width: 360px) {
+  .about-numbers__grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .about-numbers__value {
+    font-size: 1.5rem;
   }
 }
 </style>

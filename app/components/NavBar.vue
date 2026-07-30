@@ -20,6 +20,7 @@
             class="navbar__link"
             :aria-expanded="openDropdown === group.label"
             aria-haspopup="true"
+            @click="openDropdown = openDropdown === group.label ? null : group.label"
           >
             {{ group.label }}
             <svg class="navbar__chevron" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -36,6 +37,7 @@
                 class="navbar__dropdown-item"
                 :class="{ 'navbar__dropdown-item--disabled': item.comingSoon }"
                 role="menuitem"
+                :tabindex="item.comingSoon ? -1 : 0"
                 @click="!item.comingSoon && (openDropdown = null)"
               >
                 <span class="navbar__dropdown-icon">

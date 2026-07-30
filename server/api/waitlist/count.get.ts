@@ -2,16 +2,15 @@
  * GET /api/waitlist/count
  *
  * Returns the current number of waitlist signups from Vercel Postgres (Neon).
- * Used by the WaitlistForm counter badge.
+ * DFL-013: Uses cached count with 5-minute TTL to avoid uncached COUNT(*).
  */
-import { ensureWaitlistTable, useDb } from '../../utils/db'
+import { ensureWaitlistTable, getWaitlistCount } from '../../utils/db'
 
 export default defineEventHandler(async () => {
   try {
     await ensureWaitlistTable()
-    const sql = useDb()
-    const result = await sql`SELECT COUNT(*)::int AS count FROM waitlist_signups`
-    return { count: result[0]?.count ?? 0 }
+    const count = await getWaitlistCount()
+    return { count }
   }
   catch {
     // Graceful fallback if DB is not configured

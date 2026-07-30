@@ -6,7 +6,7 @@
       {{ signupCount.toLocaleString() }} Currently on Waitlist
     </div>
 
-    <form v-if="!submitted" class="waitlist-form__form" @submit.prevent="handleSubmit">
+    <form v-if="!submitted" class="waitlist-form__form" @submit.prevent="handleSubmit" aria-label="Waitlist signup">
       <div class="waitlist-form__input-group">
         <input
           id="waitlist-email"
@@ -14,6 +14,7 @@
           type="email"
           placeholder="Enter your email address"
           required
+          aria-required="true"
           autocomplete="email"
           class="waitlist-form__input"
           :disabled="loading"
@@ -28,8 +29,8 @@
         {{ loading ? 'Joining...' : 'Join the waitlist' }}
       </button>
 
-      <label class="waitlist-form__checkbox">
-        <input v-model="agreed" type="checkbox" required />
+      <label for="waitlist-agree" class="waitlist-form__checkbox">
+        <input id="waitlist-agree" v-model="agreed" type="checkbox" required aria-required="true" />
         <span>
           I agree to the
           <NuxtLink to="/legal/terms">Terms and Conditions</NuxtLink>
@@ -37,11 +38,11 @@
         </span>
       </label>
 
-      <p v-if="error" class="waitlist-form__error">{{ error }}</p>
+      <p v-if="error" class="waitlist-form__error" role="alert" aria-live="assertive">{{ error }}</p>
     </form>
 
     <!-- Success State -->
-    <div v-else class="waitlist-form__success">
+    <div v-else class="waitlist-form__success" role="status" aria-live="polite">
       <div class="waitlist-form__success-icon">
         <Icon name="lucide:check" size="20" />
       </div>

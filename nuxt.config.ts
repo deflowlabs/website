@@ -50,6 +50,9 @@ export default defineNuxtConfig({
       link: [
         { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' },
         { rel: 'alternate', type: 'application/rss+xml', title: 'DeFlow Labs Blog', href: '/rss.xml' },
+        // DFL-022: Preconnect to Sanity CDN for faster blog image loading
+        { rel: 'preconnect', href: 'https://cdn.sanity.io', crossorigin: '' },
+        { rel: 'dns-prefetch', href: 'https://cdn.sanity.io' },
       ],
     },
   },

@@ -30,7 +30,6 @@ export const ORGANIZATION_SCHEMA = {
     'https://linkedin.com/company/deflowlabs',
     'https://github.com/DeFlowLabs',
     'https://x.com/DeFlowLabs',
-    'https://discord.gg/deflowlabs',
   ],
   contactPoint: {
     '@type': 'ContactPoint',
