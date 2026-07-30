@@ -174,16 +174,8 @@ const navGroups: NavGroup[] = [
   {
     label: 'Resources',
     items: [
-      { to: '/docs', label: 'Documentation', icon: 'lucide:book-open', desc: 'Guides, API reference & SDKs', comingSoon: true },
+      { to: 'https://docs.deflowlabs.io/', label: 'Documentation', icon: 'lucide:book-open', desc: 'Guides, API reference & SDKs', external: true },
       { to: '/security', label: 'Security', icon: 'lucide:shield-check', desc: 'Audits, compliance & trust', comingSoon: true },
-    ],
-  },
-  {
-    label: 'Community',
-    items: [
-      { to: 'https://github.com/DeFlowLabs', label: 'GitHub', icon: 'lucide:github', external: true },
-      { to: 'https://x.com/DeFlowLabs', label: 'X / Twitter', icon: 'lucide:twitter', external: true },
-      { to: 'https://linkedin.com/company/deflowlabs', label: 'LinkedIn', icon: 'lucide:linkedin', external: true },
     ],
   },
   {

@@ -13,8 +13,19 @@ let _client: SanityClient | null = null
 export function useSanity() {
   if (!_client) {
     const config = useRuntimeConfig()
+    const projectId = config.public.sanityProjectId as string
+
+    // Skip client creation if no project ID is configured (local dev without Sanity)
+    if (!projectId) {
+      return {
+        client: null,
+        sanityFetch: (() => Promise.resolve(null)) as <T = any>(query: string, params?: Record<string, any>) => Promise<T>,
+        fetch: (() => Promise.resolve(null)) as <T = any>(query: string, params?: Record<string, any>) => Promise<T>,
+      }
+    }
+
     _client = createClient({
-      projectId: config.public.sanityProjectId as string,
+      projectId,
       dataset: config.public.sanityDataset as string || 'production',
       apiVersion: '2026-07-17',
       useCdn: true,

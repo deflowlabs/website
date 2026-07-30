@@ -10,9 +10,8 @@
         </div>
 
         <h1 class="hero__title animate-fade-in-up">
-          The institutional settlement layer<br />
-          for digital asset
-          <span class="gradient-text">dealflows</span>.
+          The settlement layer<br />
+          for digital asset <span class="gradient-text">dealflows</span>.
         </h1>
 
         <p class="hero__subtitle animate-fade-in-up delay-100">
@@ -84,12 +83,12 @@
       </div>
     </section>
 
-    <!-- ===== POWERED BY STRIP ===== -->
-    <section class="trust-strip">
+    <!-- ===== BACKED BY STRIP (hidden until enough logos) ===== -->
+    <section v-if="false" class="trust-strip">
       <div class="container">
-        <p class="trust-strip__label">POWERED BY</p>
+        <p class="trust-strip__label">BACKED BY</p>
         <div class="trust-strip__logos">
-          <span v-for="logo in techLogos" :key="logo" class="trust-strip__logo">{{ logo }}</span>
+          <span v-for="logo in partnerLogos" :key="logo" class="trust-strip__logo">{{ logo }}</span>
         </div>
       </div>
     </section>
@@ -100,7 +99,8 @@
         <div class="section-header">
           <span class="badge badge-info">Dealflow Types</span>
           <h2>One platform. Every deal type.</h2>
-          <p>DeFlow settles more than OTC trades. From bilateral deals to multi-investor raises, every dealflow type gets the same institutional-grade infrastructure.</p>
+          <p>DeFlow settles more than OTC trades. From bilateral deals to multi-investor raises, every dealflow type
+            gets the same institutional-grade infrastructure.</p>
         </div>
 
         <div class="deal-types__grid">
@@ -187,87 +187,32 @@
       </div>
     </section>
 
-    <!-- ===== WHAT DEFLOW IS / IS NOT ===== -->
-    <section class="is-isnot section">
-      <div class="container">
-        <div class="section-header">
-          <span class="badge badge-warning">Positioning</span>
-          <h2>What DeFlow is. And is not.</h2>
-          <p>Think of DeFlow as the SWIFT for digital assets. We're the infrastructure, not the bank.</p>
-        </div>
-
-        <div class="is-isnot__grid">
-          <div class="is-isnot__column is-isnot__column--yes">
-            <h3>
-              <Icon name="lucide:check-circle" size="20" style="color: #22C55E;" />
-              DeFlow IS
-            </h3>
-            <ul>
-              <li v-for="item in deflowIs" :key="item">{{ item }}</li>
-            </ul>
-          </div>
-          <div class="is-isnot__column is-isnot__column--no">
-            <h3>
-              <Icon name="lucide:x-circle" size="20" style="color: #EF4444;" />
-              DeFlow is NOT
-            </h3>
-            <ul>
-              <li v-for="item in deflowIsNot" :key="item">{{ item }}</li>
-            </ul>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ===== STATS ===== -->
-    <section class="stats section">
-      <div class="container">
-        <div class="stats__grid">
-          <div v-for="stat in stats" :key="stat.label" class="stats__item">
-            <span class="stats__value font-mono">{{ stat.value }}</span>
-            <span class="stats__label">{{ stat.label }}</span>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ===== LABS PREVIEW ===== -->
-    <section class="labs-preview section">
-      <div class="container">
-        <div class="labs-preview__card glass-card">
-          <div class="labs-preview__content">
-            <span class="badge badge-premium">DeFlow Labs</span>
-            <h2>Where finance meets<br />frontier research</h2>
-            <p>
-              Our R&D arm, officially recognized as an "Instituição de I&D"
-              by FCT (Portugal's leading science foundation), collaborates
-              with top universities on AI, settlement research, and compliance innovation.
-            </p>
-            <NuxtLink to="/labs" class="btn btn-secondary">
-              Explore Labs
-              <Icon name="lucide:chevron-right" size="16" />
-            </NuxtLink>
-          </div>
-          <div class="labs-preview__visual">
-            <div class="labs-preview__orb" />
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ===== BOTTOM CTA / WAITLIST ===== -->
+    <!-- ===== BOTTOM CTA ===== -->
     <section class="cta section">
       <div class="container">
-        <div class="cta__inner">
-          <div class="cta__content">
-            <h2>Ready to make your deals flow?</h2>
-            <p>
-              Join the waitlist for early access to DeFlow.
-              Invitations will be sent on a first-come, first-served basis.
-            </p>
+        <div class="cta__card glass-card">
+          <!-- Decorative chart lines -->
+          <div class="cta__chart-visual" aria-hidden="true">
+            <svg viewBox="0 0 400 120" fill="none" xmlns="http://www.w3.org/2000/svg" class="cta__chart-svg">
+              <path d="M0 100 Q50 95 100 80 T200 55 T300 35 T400 15" stroke="rgba(99, 102, 241, 0.4)" stroke-width="2"
+                fill="none" />
+              <path d="M0 110 Q50 105 100 95 T200 70 T300 50 T400 25" stroke="rgba(245, 158, 11, 0.3)" stroke-width="2"
+                fill="none" />
+            </svg>
           </div>
-          <div class="cta__form">
-            <WaitlistForm />
+          <div class="cta__body">
+            <div class="cta__content">
+              <h3>Ready to make your deals flow?</h3>
+              <p>
+                DeFlow's settlement layer brings the full power of programmable
+                escrow and built-in compliance to asset managers and investors.
+              </p>
+            </div>
+            <div class="cta__actions">
+              <NuxtLink to="/contact" class="btn btn-primary btn-lg">
+                Contact Us
+              </NuxtLink>
+            </div>
           </div>
         </div>
       </div>
@@ -291,7 +236,7 @@ useHead({
 useStructuredData(ORGANIZATION_SCHEMA)
 useStructuredData(WEBSITE_SCHEMA)
 
-const techLogos = ['Ethereum', 'Safe', 'Privy', 'Alchemy', 'Google Cloud', 'Foundry']
+const partnerLogos: string[] = [] // Add partner/investor logos here when ready
 
 const heroStats = [
   { value: '5', label: 'Deal Types' },
@@ -389,26 +334,7 @@ const securityFeatures = [
   'Wallet risk analysis (OFAC, EU, UN)',
 ]
 
-const deflowIs = [
-  'A settlement layer',
-  'A compliance engine',
-  'Escrow automation',
-  'Post-trade infrastructure',
-]
 
-const deflowIsNot = [
-  'Not an exchange',
-  'Not a custodian',
-  'Not a broker',
-  'Not a wallet',
-]
-
-const stats = [
-  { value: '5', label: 'Deal Types' },
-  { value: '9', label: 'Fee Tiers' },
-  { value: '0', label: 'PII Stored' },
-  { value: '< 15 min', label: 'Avg Settlement' },
-]
 </script>
 
 <style scoped>
@@ -965,21 +891,59 @@ const stats = [
 }
 
 /* ===== Bottom CTA ===== */
-.cta__inner {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 4rem;
+.cta__card {
+  position: relative;
+  overflow: hidden;
+  padding: 3.5rem;
+  border-radius: var(--radius-card);
+}
+
+.cta__chart-visual {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 55%;
+  height: 100%;
+  pointer-events: none;
+  opacity: 0.5;
+  mask-image: linear-gradient(to left, rgba(0, 0, 0, 0.6), transparent 80%);
+  -webkit-mask-image: linear-gradient(to left, rgba(0, 0, 0, 0.6), transparent 80%);
+}
+
+.cta__chart-svg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.cta__body {
+  position: relative;
+  z-index: 1;
+  display: flex;
   align-items: center;
+  justify-content: space-between;
+  gap: 2rem;
 }
 
 .cta__content {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 0.75rem;
+  max-width: 520px;
 }
 
 .cta__content h2 {
   font-size: clamp(1.75rem, 3vw, 2.25rem);
+}
+
+.cta__content p {
+  font-size: 1rem;
+  color: var(--color-muted-fg);
+  line-height: 1.7;
+}
+
+.cta__actions {
+  flex-shrink: 0;
 }
 
 /* ===== Responsive ===== */
@@ -1028,9 +992,16 @@ const stats = [
     display: none;
   }
 
-  .cta__inner {
-    grid-template-columns: 1fr;
-    gap: 2rem;
+  .cta__body {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1.5rem;
+  }
+
+  .cta__chart-visual {
+    width: 100%;
+    height: 50%;
+    top: 0;
   }
 }
 
