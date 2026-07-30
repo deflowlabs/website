@@ -28,6 +28,9 @@ function escapeHtml(str: string): string {
 }
 
 export default defineEventHandler(async (event) => {
+  // DFL-011: Rate limit — 5 submissions per minute per IP
+  useRateLimit(event, 60_000, 5)
+
   const body = await readBody<{
     name: string
     email: string
@@ -61,10 +64,21 @@ export default defineEventHandler(async (event) => {
     })
   }
 
+  // Verify Turnstile token
   const config = useRuntimeConfig()
+  const isDev = process.env.NODE_ENV === 'development'
 
-  // Verify Turnstile token (skip in dev if no secret key configured)
-  if (config.turnstileSecretKey && body.turnstileToken !== 'dev-bypass') {
+  if (isDev && body.turnstileToken === 'dev-bypass') {
+    // Allow bypass only in local development
+  }
+  else if (!config.turnstileSecretKey) {
+    // Fail closed: missing secret in production is a configuration error
+    throw createError({
+      statusCode: 500,
+      message: 'Service temporarily unavailable.',
+    })
+  }
+  else {
     if (!body.turnstileToken) {
       throw createError({
         statusCode: 400,
@@ -127,7 +141,7 @@ export default defineEventHandler(async (event) => {
   }
   else {
     // Development fallback — no PII logged
-    console.log('[Contact] Form submission received:', {
+    console.warn('[Contact] Form submission received (dev):', {
       type: body.type,
       messageLength: body.message.length,
     })

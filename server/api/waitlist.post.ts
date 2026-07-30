@@ -13,6 +13,9 @@ import { createHmac } from 'node:crypto'
 import { ensureWaitlistTable, useDb } from '../utils/db'
 
 export default defineEventHandler(async (event) => {
+  // DFL-011: Rate limit — 3 signups per minute per IP
+  useRateLimit(event, 60_000, 3)
+
   const body = await readBody<{ email: string; turnstileToken: string }>(event)
 
   if (!body?.email || typeof body.email !== 'string') {
@@ -31,9 +34,28 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  // Verify Turnstile token (skip in dev if no secret key configured)
+  // Verify Turnstile token
   const config = useRuntimeConfig()
-  if (config.turnstileSecretKey && body.turnstileToken !== 'dev-bypass') {
+  const isDev = process.env.NODE_ENV === 'development'
+
+  if (isDev && body.turnstileToken === 'dev-bypass') {
+    // Allow bypass only in local development
+  }
+  else if (!config.turnstileSecretKey) {
+    // Fail closed: missing secret in production is a configuration error
+    throw createError({
+      statusCode: 500,
+      message: 'Service temporarily unavailable.',
+    })
+  }
+  else {
+    if (!body.turnstileToken) {
+      throw createError({
+        statusCode: 400,
+        message: 'Bot verification is required.',
+      })
+    }
+
     const turnstileResult = await $fetch<{ success: boolean }>(
       'https://challenges.cloudflare.com/turnstile/v0/siteverify',
       {
@@ -54,9 +76,21 @@ export default defineEventHandler(async (event) => {
     }
   }
 
-  // Hash the email (Zero-PII) — salt from runtimeConfig for consistency
-  const salt = config.piiSaltSecret || 'deflow-waitlist-dev-salt'
-  const hashedEmail = createHmac('sha256', salt)
+  // Hash the email (Zero-PII) — fail closed if salt is missing
+  const salt = config.piiSaltSecret
+  if (!salt) {
+    if (isDev) {
+      // Allow a dev-only fallback so local development works without secrets
+      console.warn('[Waitlist] PII_SALT_SECRET not set — using dev fallback. Never use in production.')
+    }
+    else {
+      throw createError({
+        statusCode: 500,
+        message: 'Service temporarily unavailable.',
+      })
+    }
+  }
+  const hashedEmail = createHmac('sha256', salt || 'deflow-waitlist-dev-salt')
     .update(body.email.toLowerCase().trim())
     .digest('hex')
 
@@ -73,13 +107,14 @@ export default defineEventHandler(async (event) => {
   }
   catch (err: unknown) {
     // PostgreSQL error code 23505 = unique_violation (duplicate email hash)
+    // Return identical success response to prevent email enumeration (DFL-012)
     if (err && typeof err === 'object' && 'code' in err && err.code === '23505') {
-      throw createError({
-        statusCode: 409,
-        message: 'You\'re already on the waitlist!',
-      })
+      return {
+        success: true,
+        message: 'Successfully joined the waitlist!',
+      }
     }
-    console.error('[Waitlist] Database error:', err)
+    console.error('[Waitlist] Database error')
     throw createError({
       statusCode: 500,
       message: 'Something went wrong. Please try again later.',
