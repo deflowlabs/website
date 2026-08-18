@@ -7,7 +7,7 @@
         <div class="section-header">
           <span class="badge badge-success">Security & Compliance</span>
           <h1>
-            Security is infrastructure,<br />
+            Security is infrastructure,<br >
             <span class="gradient-text">not a feature</span>.
           </h1>
           <p>

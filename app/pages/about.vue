@@ -4,7 +4,7 @@
       <div class="container">
         <div class="section-header">
           <span class="badge badge-premium">Company</span>
-          <h1>Building the settlement<br />infrastructure of tomorrow</h1>
+          <h1>Building the settlement<br >infrastructure of tomorrow</h1>
           <p>
             DeFlow Labs is on a mission to make institutional digital asset
             settlement non-custodial, compliant, and programmable.

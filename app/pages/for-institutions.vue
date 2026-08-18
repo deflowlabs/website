@@ -7,7 +7,7 @@
         <div class="section-header">
           <span class="badge badge-premium">White-Label Infrastructure</span>
           <h1>
-            Your branded settlement<br />
+            Your branded settlement<br >
             <span class="gradient-text">infrastructure</span>.
           </h1>
           <p>

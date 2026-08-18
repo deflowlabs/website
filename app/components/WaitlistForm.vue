@@ -6,7 +6,7 @@
       {{ signupCount.toLocaleString() }} Currently on Waitlist
     </div>
 
-    <form v-if="!submitted" class="waitlist-form__form" @submit.prevent="handleSubmit" aria-label="Waitlist signup">
+    <form v-if="!submitted" class="waitlist-form__form" aria-label="Waitlist signup" @submit.prevent="handleSubmit">
       <div class="waitlist-form__input-group">
         <input
           id="waitlist-email"
@@ -18,7 +18,7 @@
           autocomplete="email"
           class="waitlist-form__input"
           :disabled="loading"
-        />
+        >
       </div>
 
       <!-- Turnstile widget (invisible mode — hidden from UI) -->
@@ -30,7 +30,7 @@
       </button>
 
       <label for="waitlist-agree" class="waitlist-form__checkbox">
-        <input id="waitlist-agree" v-model="agreed" type="checkbox" required aria-required="true" />
+        <input id="waitlist-agree" v-model="agreed" type="checkbox" required aria-required="true" >
         <span>
           I agree to the
           <NuxtLink to="/legal/terms">Terms and Conditions</NuxtLink>

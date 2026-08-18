@@ -10,7 +10,7 @@
         </div>
 
         <h1 class="hero__title animate-fade-in-up">
-          The settlement layer<br />
+          The settlement layer<br>
           for digital asset <span class="gradient-text">dealflows</span>.
         </h1>
 
@@ -162,7 +162,7 @@
         <div class="security__inner">
           <div class="security__content">
             <span class="badge badge-success">Security & Compliance</span>
-            <h2>Built for institutions.<br />Trusted by design.</h2>
+            <h2>Built for institutions.<br>Trusted by design.</h2>
             <p>
               DeFlow never holds your assets. We never store your identity.
               Every transaction is verified on-chain with deterministic finality.

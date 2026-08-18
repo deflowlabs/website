@@ -5,7 +5,7 @@
       <div class="container">
         <div class="section-header">
           <span class="badge badge-info">Platform Overview</span>
-          <h1>The settlement layer<br />your deals deserve</h1>
+          <h1>The settlement layer<br >your deals deserve</h1>
           <p>
             DeFlow combines non-custodial smart escrow, compliant identity verification,
             and programmable settlement into a single, institutional-grade platform.
@@ -47,7 +47,7 @@
       <div class="container">
         <div class="section-header">
           <span class="badge badge-success">Security</span>
-          <h2>Security isn't a feature.<br />It's the foundation.</h2>
+          <h2>Security isn't a feature.<br >It's the foundation.</h2>
           <p>Every layer of DeFlow is designed with zero-trust principles.</p>
         </div>
         <div class="product-security__grid">

@@ -37,20 +37,20 @@
 
           <!-- Contact Form -->
           <div class="contact-form-wrapper glass-card">
-            <form v-if="!submitted" class="contact-form" @submit.prevent="handleSubmit" aria-label="Contact form">
+            <form v-if="!submitted" class="contact-form" aria-label="Contact form" @submit.prevent="handleSubmit">
               <div class="contact-form__field">
                 <label for="contact-name">Full Name *</label>
-                <input id="contact-name" v-model="form.name" type="text" required aria-required="true" placeholder="John Doe" />
+                <input id="contact-name" v-model="form.name" type="text" required aria-required="true" placeholder="John Doe" >
               </div>
 
               <div class="contact-form__field">
                 <label for="contact-email">Email *</label>
-                <input id="contact-email" v-model="form.email" type="email" required aria-required="true" placeholder="john@company.com" />
+                <input id="contact-email" v-model="form.email" type="email" required aria-required="true" placeholder="john@company.com" >
               </div>
 
               <div class="contact-form__field">
                 <label for="contact-company">Company / Organization</label>
-                <input id="contact-company" v-model="form.company" type="text" placeholder="Acme Capital" />
+                <input id="contact-company" v-model="form.company" type="text" placeholder="Acme Capital" >
               </div>
 
               <div class="contact-form__field">

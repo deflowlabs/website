@@ -6,7 +6,7 @@
         <div class="labs-hero__inner">
           <div class="labs-hero__content">
             <span class="badge badge-premium">DeFlow Labs</span>
-            <h1>Where finance meets<br />frontier research</h1>
+            <h1>Where finance meets<br >frontier research</h1>
             <p>
               DeFlow Labs is the R&amp;D arm of DeFlow Labs, Inc. We are building
               partnerships with academic institutions to advance digital asset

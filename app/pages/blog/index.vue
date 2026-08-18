@@ -20,7 +20,7 @@
               class="blog-search__input"
               placeholder="Search articles..."
               aria-label="Search articles"
-            />
+            >
           </div>
           <div class="blog-tabs" role="tablist">
             <button
