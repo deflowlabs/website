@@ -8,7 +8,7 @@
  */
 import { createClient } from '@sanity/client'
 
-const RSS_QUERY = `*[_type == "post" && defined(publishedAt)] | order(publishedAt desc) [0...50] {
+const RSS_QUERY = `*[_type == "post" && defined(publishedAt) && !(_id in path("drafts.**")) && publishedAt <= now()] | order(publishedAt desc, _id asc) [0...50] {
   title,
   "slug": slug.current,
   excerpt,
@@ -20,10 +20,15 @@ const RSS_QUERY = `*[_type == "post" && defined(publishedAt)] | order(publishedA
 export default defineEventHandler(async (event) => {
   const config = useRuntimeConfig()
 
+  if (!config.public.sanityProjectId) {
+    setResponseHeader(event, 'Content-Type', 'application/rss+xml; charset=UTF-8')
+    return '<?xml version="1.0" encoding="UTF-8"?><rss version="2.0"><channel><title>DeFlow Labs Blog</title><link>https://deflowlabs.io/blog</link><description>DeFlow Labs updates</description></channel></rss>'
+  }
+
   const client = createClient({
     projectId: config.public.sanityProjectId as string,
     dataset: config.public.sanityDataset as string || 'production',
-    apiVersion: '2026-07-17',
+    apiVersion: config.public.sanityApiVersion as string,
     useCdn: true,
   })
 

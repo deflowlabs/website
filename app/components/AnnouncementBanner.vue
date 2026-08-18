@@ -3,22 +3,22 @@
     <div
       v-if="announcement && !isDismissed"
       class="announcement"
-      :style="{ background: announcement.backgroundColor || '#1E1E2E' }"
+      :class="`announcement--${announcement.tone || 'info'}`"
       role="banner"
       aria-label="Announcement"
     >
       <div class="announcement__inner container">
         <component
-          :is="announcement.link ? 'a' : 'span'"
-          :href="announcement.link || undefined"
-          :target="announcement.link ? '_blank' : undefined"
-          :rel="announcement.link ? 'noopener noreferrer' : undefined"
+          :is="announcementUrl ? 'a' : 'span'"
+          :href="announcementUrl"
+          :target="announcementUrl ? '_blank' : undefined"
+          :rel="announcementUrl ? 'noopener noreferrer' : undefined"
           class="announcement__content"
         >
           <span class="announcement__dot" />
           <span class="announcement__text">{{ announcement.text }}</span>
-          <span v-if="announcement.linkText" class="announcement__cta">
-            {{ announcement.linkText }}
+          <span v-if="announcement.cta?.label" class="announcement__cta">
+            {{ announcement.cta.label }}
           </span>
         </component>
         <button
@@ -43,26 +43,19 @@
  *
  * Emits `visibility-change` to parent layout for padding/offset coordination.
  */
+import { ACTIVE_ANNOUNCEMENT_QUERY } from '~/utils/sanity-queries'
+import type { ACTIVE_ANNOUNCEMENT_QUERY_RESULT } from '~/types/sanity.generated'
+import { safeExternalUrl } from '~/utils/safe-url'
+
 const { sanityFetch } = useSanity()
 
 const emit = defineEmits<{
   'visibility-change': [visible: boolean]
 }>()
 
-interface Announcement {
-  _id: string
-  text: string
-  link?: string
-  linkText?: string
-  backgroundColor?: string
-}
-
-const ANNOUNCEMENT_QUERY = `*[_type == "announcement" && isActive == true][0] {
-  _id, text, link, linkText, backgroundColor
-}`
-
-const announcement = ref<Announcement | null>(null)
+const announcement = ref<ACTIVE_ANNOUNCEMENT_QUERY_RESULT>(null)
 const isDismissed = ref(false)
+const announcementUrl = computed(() => safeExternalUrl(announcement.value?.cta?.url))
 
 // Emit visibility state whenever it changes
 const isVisible = computed(() => !!announcement.value && !isDismissed.value)
@@ -70,7 +63,7 @@ watch(isVisible, (val) => emit('visibility-change', val), { immediate: true })
 
 onMounted(async () => {
   try {
-    const data = await sanityFetch<Announcement>(ANNOUNCEMENT_QUERY)
+    const data = await sanityFetch<ACTIVE_ANNOUNCEMENT_QUERY_RESULT>(ACTIVE_ANNOUNCEMENT_QUERY)
     if (data) {
       announcement.value = data
       const key = `deflow-announcement-dismissed-${data._id}`
@@ -105,6 +98,10 @@ function dismiss() {
   z-index: 101;
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
+
+.announcement--info { background: #1e293b; }
+.announcement--success { background: #14532d; }
+.announcement--warning { background: #713f12; }
 
 .announcement__inner {
   display: flex;

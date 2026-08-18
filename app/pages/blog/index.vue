@@ -76,7 +76,7 @@
         <div v-if="displayedArticles.length" class="blog-articles__grid">
           <NuxtLink
             v-for="article in displayedArticles"
-            :key="article.slug"
+            :key="article.slug || article._id"
             :to="`/blog/${article.slug}`"
             class="blog-article glass-card"
           >
@@ -141,6 +141,11 @@ import {
   PAGINATED_POSTS_QUERY,
   NON_FEATURED_COUNT_QUERY,
 } from '~/utils/sanity-queries'
+import type {
+  FEATURED_POST_QUERY_RESULT,
+  NON_FEATURED_COUNT_QUERY_RESULT,
+  PAGINATED_POSTS_QUERY_RESULT,
+} from '~/types/sanity.generated'
 
 useHead({
   title: 'Blog — DeFlow Labs',
@@ -161,39 +166,56 @@ const PAGE_SIZE = 6
 const { sanityFetch } = useSanity()
 
 // Featured post
-const featuredPost = ref<any>(null)
-const allPosts = ref<any[]>([])
+type SanityPost = PAGINATED_POSTS_QUERY_RESULT[number]
+type BlogCard = Omit<SanityPost, '_id' | 'coverImage' | 'coverImageAlt'> & {
+  _id?: string
+  coverImage?: string | null
+  coverImageAlt?: string | null
+  color?: string
+}
+
+const featuredPost = ref<FEATURED_POST_QUERY_RESULT>(null)
+const allPosts = ref<BlogCard[]>([])
 const totalNonFeatured = ref(0)
 const page = ref(0)
 
 // Placeholder articles (shown when Sanity has no content yet)
-const placeholderArticles = [
+const placeholderArticles: BlogCard[] = [
   {
+    _id: 'placeholder-introducing-deflow',
     slug: 'introducing-deflow',
     title: 'Introducing DeFlow — The Institutional Settlement Layer',
     excerpt: 'Why we built a non-custodial, compliant settlement engine for digital asset dealflows.',
     category: 'Product',
-    author: { name: 'DeFlow Labs' },
+    author: { name: 'DeFlow Labs', avatar: null },
+    coverImage: null,
+    coverImageAlt: null,
     publishedAt: null,
     readingTime: 8,
     color: 'linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(139, 92, 246, 0.2))',
   },
   {
+    _id: 'placeholder-zero-pii',
     slug: 'zero-pii-architecture',
     title: 'Zero-PII: How We Verify Identity Without Storing It',
     excerpt: 'A deep dive into HMAC-SHA256 identity hashing and privacy-preserving compliance.',
     category: 'Engineering',
-    author: { name: 'DeFlow Labs' },
+    author: { name: 'DeFlow Labs', avatar: null },
+    coverImage: null,
+    coverImageAlt: null,
     publishedAt: null,
     readingTime: 12,
     color: 'linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(52, 211, 153, 0.2))',
   },
   {
+    _id: 'placeholder-settlement',
     slug: 'settlement-explained',
     title: 'How Settlement Works on DeFlow',
     excerpt: 'From deal creation to final settlement — understanding the five-step process.',
     category: 'Product',
-    author: { name: 'DeFlow Labs' },
+    author: { name: 'DeFlow Labs', avatar: null },
+    coverImage: null,
+    coverImageAlt: null,
     publishedAt: null,
     readingTime: 6,
     color: 'linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(96, 165, 250, 0.2))',
@@ -204,9 +226,9 @@ const placeholderArticles = [
 const { data: initialData } = await useAsyncData('blog-init', async () => {
   try {
     const [featured, posts, count] = await Promise.all([
-      sanityFetch(FEATURED_POST_QUERY),
-      sanityFetch(PAGINATED_POSTS_QUERY, { start: 0, end: PAGE_SIZE, featuredId: '' }),
-      sanityFetch(NON_FEATURED_COUNT_QUERY, { featuredId: '' }),
+      sanityFetch<FEATURED_POST_QUERY_RESULT>(FEATURED_POST_QUERY),
+      sanityFetch<PAGINATED_POSTS_QUERY_RESULT>(PAGINATED_POSTS_QUERY, { start: 0, end: PAGE_SIZE, featuredId: '' }),
+      sanityFetch<NON_FEATURED_COUNT_QUERY_RESULT>(NON_FEATURED_COUNT_QUERY, { featuredId: '' }),
     ])
     return { featured, posts, count }
   } catch {
@@ -224,7 +246,7 @@ if (initialData.value) {
 
 const usePlaceholders = computed(() => !featuredPost.value && allPosts.value.length === 0)
 
-const articles = computed(() => usePlaceholders.value ? placeholderArticles : allPosts.value)
+const articles = computed<BlogCard[]>(() => usePlaceholders.value ? placeholderArticles : allPosts.value)
 
 /**
  * Filters articles by active category and search query.
@@ -233,12 +255,12 @@ const articles = computed(() => usePlaceholders.value ? placeholderArticles : al
 const filteredArticles = computed(() => {
   let result = articles.value
   if (activeCategory.value !== 'All') {
-    result = result.filter((a: any) => a.category === activeCategory.value)
+    result = result.filter(a => a.category === activeCategory.value)
   }
   if (searchQuery.value.trim()) {
     const q = searchQuery.value.toLowerCase()
     result = result.filter(
-      (a: any) =>
+      a =>
         a.title?.toLowerCase().includes(q) ||
         a.excerpt?.toLowerCase().includes(q),
     )
@@ -262,7 +284,7 @@ async function loadMore() {
   try {
     const start = page.value * PAGE_SIZE
     const end = start + PAGE_SIZE
-    const morePosts = await sanityFetch(PAGINATED_POSTS_QUERY, {
+    const morePosts = await sanityFetch<PAGINATED_POSTS_QUERY_RESULT>(PAGINATED_POSTS_QUERY, {
       start,
       end,
       featuredId: featuredPost.value?._id || '',

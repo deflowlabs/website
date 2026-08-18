@@ -1,6 +1,8 @@
 import withNuxt from './.nuxt/eslint.config.mjs'
 
-export default withNuxt({
+export default withNuxt(
+  { ignores: ['app/types/sanity.generated.ts'] },
+  {
   rules: {
     // Vue
     'vue/multi-word-component-names': 'off',
@@ -13,4 +15,5 @@ export default withNuxt({
     // General
     'no-console': ['warn', { allow: ['warn', 'error'] }],
   },
-})
+  },
+)

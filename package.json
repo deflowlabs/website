@@ -9,7 +9,11 @@
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare",
     "lint": "eslint .",
+    "test": "node --test tests/*.test.ts",
     "typecheck": "nuxt typecheck"
+  },
+  "engines": {
+    "node": ">=24 <25"
   },
   "dependencies": {
     "@neondatabase/serverless": "^1.1.0",
@@ -17,20 +21,24 @@
     "@nuxt/icon": "^2.3.1",
     "@nuxt/image": "^2.0.0",
     "@nuxtjs/sitemap": "^8.2.3",
+    "@portabletext/vue": "2.0.0",
     "@sanity/client": "^7.3.0",
     "@sanity/image-url": "^1.1.0",
+    "@sanity/preview-url-secret": "4.1.4",
+    "groq": "6.9.2",
     "nuxt": "^4.4.8",
     "nuxt-site-config": "^4.1.2",
     "vue": "^3.5.39",
     "vue-router": "^5.1.0"
   },
   "devDependencies": {
+    "@iconify-json/lucide": "^1.2.123",
     "@nuxt/eslint": "^1.4.0",
     "@tailwindcss/typography": "^0.5.0",
     "@tailwindcss/vite": "^4.1.0",
-    "@types/node": "^26.1.2",
+    "@types/node": "24.10.1",
     "tailwindcss": "^4.1.0",
-    "typescript": "^5.8.0",
+    "typescript": "5.9.3",
     "vue-tsc": "^3.3.7"
   },
   "overrides": {

@@ -1,50 +1,22 @@
+type QueryParameters = Record<string, string | number | boolean | null>
+
 /**
- * useSanity composable — lightweight Sanity CMS client.
- *
- * Replaces @nuxtjs/sanity to avoid React dependency conflicts in the monorepo.
- * Uses @sanity/client directly with runtime config for project credentials.
- *
- * @returns Object with `sanityFetch` method for GROQ queries and `client` instance.
+ * Executes CMS reads through Nitro. The server alone decides whether the current
+ * request may use the authenticated drafts perspective, so read tokens never
+ * enter browser bundles.
  */
-import { createClient, type SanityClient } from '@sanity/client'
-
-let _client: SanityClient | null = null
-
 export function useSanity() {
-  if (!_client) {
-    const config = useRuntimeConfig()
-    const projectId = config.public.sanityProjectId as string
+  const config = useRuntimeConfig()
+  const requestFetch = useRequestFetch()
 
-    // Skip client creation if no project ID is configured (local dev without Sanity)
-    if (!projectId) {
-      return {
-        client: null,
-        sanityFetch: (() => Promise.resolve(null)) as <T = any>(query: string, params?: Record<string, any>) => Promise<T>,
-        fetch: (() => Promise.resolve(null)) as <T = any>(query: string, params?: Record<string, any>) => Promise<T>,
-      }
-    }
-
-    _client = createClient({
-      projectId,
-      dataset: config.public.sanityDataset as string || 'production',
-      apiVersion: '2026-07-17',
-      useCdn: true,
+  const sanityFetch = async <T = unknown>(query: string, params: QueryParameters = {}): Promise<T> => {
+    if (!config.public.sanityProjectId) return null as T
+    const response = await requestFetch<{ data: T }>('/api/sanity/query', {
+      method: 'POST',
+      body: { query, params },
     })
+    return response.data
   }
 
-  /**
-   * Execute a GROQ query against the Sanity dataset.
-   * @param query - GROQ query string
-   * @param params - Optional query parameters
-   */
-  const sanityFetch = <T = any>(query: string, params?: Record<string, any>): Promise<T> => {
-    return _client!.fetch<T>(query, params || {})
-  }
-
-  return {
-    client: _client,
-    sanityFetch,
-    /** @deprecated Use `sanityFetch` instead */
-    fetch: sanityFetch,
-  }
+  return { sanityFetch, fetch: sanityFetch }
 }

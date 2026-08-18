@@ -24,14 +24,8 @@
     <section v-if="article" class="article-body section" style="padding-top: 0">
       <div class="container">
         <div class="article-content">
-          <!-- Sanity Portable Text body -->
           <div v-if="article.body" class="prose">
-            <!-- Portable text body will render here when content is published -->
-            <p v-for="(block, i) in article.body" :key="i">
-              <template v-if="block._type === 'block'">
-                <span v-for="(child, j) in (block.children || [])" :key="j">{{ child.text }}</span>
-              </template>
-            </p>
+            <PortableContent :value="article.body" />
           </div>
 
           <!-- No body content yet -->
@@ -51,13 +45,14 @@
  * Returns 404 for unknown/unpublished slugs.
  */
 import { POST_BY_SLUG_QUERY } from '~/utils/sanity-queries'
+import type { POST_BY_SLUG_QUERY_RESULT } from '~/types/sanity.generated'
 
 const route = useRoute()
 const slug = route.params.slug as string
 
 const { sanityFetch } = useSanity()
 const { data: sanityArticle } = await useAsyncData(`post-${slug}`, () =>
-  sanityFetch(POST_BY_SLUG_QUERY, { slug }),
+  sanityFetch<POST_BY_SLUG_QUERY_RESULT>(POST_BY_SLUG_QUERY, { slug }),
 )
 
 // Return a proper 404 for unknown slugs instead of fabricating content (DFL-015)
@@ -69,10 +64,10 @@ if (!sanityArticle.value) {
   })
 }
 
-const article = computed(() => sanityArticle.value)
+const article = computed(() => sanityArticle.value as NonNullable<POST_BY_SLUG_QUERY_RESULT>)
 
 useHead({
-  title: `${article.value.title} — DeFlow Labs Blog`,
+  title: `${article.value.title || 'Article'} — DeFlow Labs Blog`,
   meta: [
     {
       name: 'description',
@@ -94,10 +89,10 @@ if (article.value.coverImage) {
 }
 
 useStructuredData(createBlogPostSchema({
-  title: article.value.title,
-  excerpt: article.value.excerpt,
-  publishedAt: article.value.publishedAt,
-  author: article.value.author,
+  title: article.value.title || 'DeFlow Labs article',
+  excerpt: article.value.excerpt || '',
+  publishedAt: article.value.publishedAt || '',
+  author: article.value.author?.name ? { name: article.value.author.name } : null,
   slug,
 }))
 

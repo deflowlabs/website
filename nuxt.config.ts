@@ -5,6 +5,32 @@
  */
 import tailwindcss from '@tailwindcss/vite'
 
+const studioOrigin = process.env.NUXT_SANITY_STUDIO_ORIGIN || 'http://localhost:3333'
+
+/**
+ * A Vercel production deployment without one of these values would build but
+ * leave CMS preview, bot protection, email delivery or waitlist persistence
+ * unusable. Fail during deployment instead of discovering the gap from users.
+ */
+if (process.env.VERCEL_ENV === 'production') {
+  const requiredProductionVariables = [
+    'NUXT_PUBLIC_SITE_URL',
+    'NUXT_SANITY_PROJECT_ID',
+    'NUXT_SANITY_DATASET',
+    'NUXT_SANITY_API_VERSION',
+    'NUXT_SANITY_STUDIO_ORIGIN',
+    'SANITY_API_READ_TOKEN',
+    'SANITY_PREVIEW_COOKIE_SECRET',
+    'NUXT_PUBLIC_TURNSTILE_SITE_KEY',
+    'TURNSTILE_SECRET_KEY',
+    'RESEND_API_KEY',
+    'PII_SALT_SECRET',
+    'POSTGRES_URL',
+  ]
+  const missing = requiredProductionVariables.filter(name => !process.env[name])
+  if (missing.length) throw new Error(`Vercel production environment is missing: ${missing.join(', ')}`)
+}
+
 export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
 
@@ -89,6 +115,7 @@ export default defineNuxtConfig({
   // Sitemap configuration — static + dynamic blog routes from Sanity
   sitemap: {
     zeroRuntime: true,
+    sources: ['/api/__sitemap__/urls'],
     urls: [
       '/',
       '/product',
@@ -119,12 +146,15 @@ export default defineNuxtConfig({
     contactEmail: process.env.CONTACT_EMAIL || 'contact@deflowlabs.io',
     piiSaltSecret: process.env.PII_SALT_SECRET || '',
     postgresUrl: process.env.POSTGRES_URL || '',
+    sanityApiReadToken: process.env.SANITY_API_READ_TOKEN || '',
+    sanityPreviewCookieSecret: process.env.SANITY_PREVIEW_COOKIE_SECRET || '',
     public: {
       // Client-accessible
       turnstileSiteKey: process.env.NUXT_PUBLIC_TURNSTILE_SITE_KEY || '',
       siteUrl: process.env.NUXT_PUBLIC_SITE_URL || 'https://deflowlabs.io',
       sanityProjectId: process.env.NUXT_SANITY_PROJECT_ID || '',
       sanityDataset: process.env.NUXT_SANITY_DATASET || 'production',
+      sanityApiVersion: process.env.NUXT_SANITY_API_VERSION || '2026-08-17',
     },
   },
 
@@ -163,7 +193,7 @@ export default defineNuxtConfig({
     routeRules: {
       '/**': {
         headers: {
-          'X-Frame-Options': 'DENY',
+          'Content-Security-Policy': `frame-ancestors 'self' ${studioOrigin}`,
           'X-Content-Type-Options': 'nosniff',
           'Referrer-Policy': 'strict-origin-when-cross-origin',
           'Permissions-Policy': 'camera=(), microphone=(), geolocation=()',

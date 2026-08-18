@@ -57,7 +57,7 @@
         </div>
 
         <div class="labs-projects__grid">
-          <div v-for="project in projects" :key="project.slug" class="labs-project glass-card">
+          <div v-for="project in projects" :key="project.slug || project.title || 'project'" class="labs-project glass-card">
             <div class="labs-project__header">
               <span
                 class="badge"
@@ -67,7 +67,7 @@
                   'badge-info': project.status === 'completed',
                 }"
               >
-                {{ project.status.charAt(0).toUpperCase() + project.status.slice(1) }}
+                {{ (project.status || 'upcoming').charAt(0).toUpperCase() + (project.status || 'upcoming').slice(1) }}
               </span>
             </div>
             <h3>{{ project.title }}</h3>
@@ -77,13 +77,13 @@
               <span v-for="tag in project.tags" :key="tag" class="labs-project__tag">{{ tag }}</span>
             </div>
             <a
-              v-if="project.publicationUrl"
-              :href="project.publicationUrl"
+              v-if="safeExternalUrl(project.cta?.url || project.publicationUrl)"
+              :href="safeExternalUrl(project.cta?.url || project.publicationUrl)"
               target="_blank"
               rel="noopener"
               class="labs-project__link"
             >
-              View Publication
+              {{ project.cta?.label || 'View publication' }}
               <Icon name="lucide:arrow-right" size="14" />
             </a>
           </div>
@@ -122,6 +122,8 @@
  * Includes AI pillar and FCT recognition badge.
  */
 import { LABS_PROJECTS_QUERY } from '~/utils/sanity-queries'
+import type { LABS_PROJECTS_QUERY_RESULT } from '~/types/sanity.generated'
+import { safeExternalUrl } from '~/utils/safe-url'
 
 useHead({
   title: 'Labs — DeFlow Labs',
@@ -134,21 +136,25 @@ useCanonical()
 
 const { sanityFetch } = useSanity()
 const { data: sanityProjects } = await useAsyncData('labs-projects', () =>
-  sanityFetch(LABS_PROJECTS_QUERY),
+  sanityFetch<LABS_PROJECTS_QUERY_RESULT>(LABS_PROJECTS_QUERY),
 )
 
 const placeholderProject = [
   {
     slug: 'research-project-1',
     title: 'Research Project #1',
-    status: 'upcoming',
+    status: 'upcoming' as const,
     partner: 'Partner to be announced',
     description: 'Details on our first research collaboration will be shared soon. This project focuses on advancing settlement infrastructure for institutional digital asset markets.',
     tags: ['Settlement', 'Infrastructure'],
+    publicationUrl: null,
+    cta: null,
   },
 ]
 
-const projects = computed(() => {
+type LabsCard = Pick<LABS_PROJECTS_QUERY_RESULT[number], 'slug' | 'title' | 'status' | 'partner' | 'description' | 'tags' | 'publicationUrl' | 'cta'>
+
+const projects = computed<LabsCard[]>(() => {
   const p = sanityProjects.value
   return p?.length ? p : placeholderProject
 })
