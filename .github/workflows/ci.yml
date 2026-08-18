@@ -2,34 +2,69 @@ name: Website CI
 
 on:
   push:
-    branches: [stage, main]
+    branches: [master, stage, main]
   pull_request:
-    branches: [stage, main]
+    branches: [master, stage, main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   quality:
     name: Lint, Typecheck & Build
     runs-on: ubuntu-latest
+    timeout-minutes: 25
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
         with:
-          node-version: '22'
+          node-version: '24'
           cache: 'npm'
 
       - name: Install dependencies
+        id: install
         run: npm ci
 
+      - name: Unit tests
+        id: test
+        run: npm test
+
       - name: Lint
+        id: lint
         run: npm run lint
 
       - name: Typecheck
+        id: typecheck
         run: npm run typecheck
 
       - name: Build
+        id: build
         run: npm run build
         env:
           NUXT_PUBLIC_SITE_URL: https://deflowlabs.io
+
+      - name: Audit production dependencies
+        id: audit
+        run: npm audit --omit=dev --audit-level=high
+
+      - name: Publish website summary
+        if: always()
+        run: |
+          {
+            echo '## Website quality'
+            echo
+            echo '| Gate | Result |'
+            echo '|---|---|'
+            echo '| Unit tests | `${{ steps.test.outcome }}` |'
+            echo '| Lint | `${{ steps.lint.outcome }}` |'
+            echo '| Typecheck | `${{ steps.typecheck.outcome }}` |'
+            echo '| Production build | `${{ steps.build.outcome }}` |'
+            echo '| Production dependency audit | `${{ steps.audit.outcome }}` |'
+          } >> "$GITHUB_STEP_SUMMARY"
