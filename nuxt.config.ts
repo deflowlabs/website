@@ -9,6 +9,7 @@ const sanityProjectId = process.env.NUXT_SANITY_PROJECT_ID || 'i34vbeac'
 const sanityDataset = process.env.NUXT_SANITY_DATASET || 'production'
 const sanityApiVersion = process.env.NUXT_SANITY_API_VERSION || '2026-08-17'
 const sanityReadToken = process.env.SANITY_API_READ_TOKEN || ''
+const sanityPreviewEnabled = process.env.NUXT_SANITY_PREVIEW_ENABLED === 'true'
 const configuredStudioOrigin = process.env.NUXT_SANITY_STUDIO_ORIGIN || 'http://localhost:3333'
 const studioUrl = new URL(configuredStudioOrigin)
 
@@ -29,17 +30,53 @@ if (process.env.VERCEL_ENV === 'production') {
     'NUXT_SANITY_PROJECT_ID',
     'NUXT_SANITY_DATASET',
     'NUXT_SANITY_API_VERSION',
-    'NUXT_SANITY_STUDIO_ORIGIN',
-    'SANITY_API_READ_TOKEN',
+    'SANITY_REVALIDATE_SECRET',
+    'VERCEL_ISR_BYPASS_TOKEN',
     'NUXT_PUBLIC_TURNSTILE_SITE_KEY',
     'TURNSTILE_SECRET_KEY',
     'RESEND_API_KEY',
     'PII_SALT_SECRET',
     'POSTGRES_URL',
   ]
+  if (sanityPreviewEnabled) {
+    requiredProductionVariables.push('NUXT_SANITY_STUDIO_ORIGIN', 'SANITY_API_READ_TOKEN')
+  }
   const missing = requiredProductionVariables.filter(name => !process.env[name])
   if (missing.length) throw new Error(`Vercel production environment is missing: ${missing.join(', ')}`)
 }
+
+if (sanityPreviewEnabled && !sanityReadToken) {
+  throw new Error('SANITY_API_READ_TOKEN is required when NUXT_SANITY_PREVIEW_ENABLED=true')
+}
+
+if (!sanityPreviewEnabled && process.env.VERCEL_ENV === 'production' && sanityReadToken) {
+  throw new Error('Production must not define SANITY_API_READ_TOKEN unless NUXT_SANITY_PREVIEW_ENABLED=true')
+}
+
+const contentRouteRules = sanityPreviewEnabled
+  ? {
+      '/**': {
+        isr: false,
+        headers: {
+          'Cache-Control': 'private, no-store, max-age=0',
+          'X-Robots-Tag': 'noindex, nofollow',
+        },
+      },
+    }
+  : {
+      '/': { isr: 3600 },
+      '/product': { isr: 3600 },
+      '/about': { isr: 3600 },
+      '/labs': { isr: 3600 },
+      '/labs/**': { isr: 3600 },
+      '/blog': { isr: 600 },
+      '/blog/**': { isr: 3600 },
+      '/legal/**': { isr: 86400 },
+      '/waitlist': { isr: 3600 },
+      '/for-institutions': { isr: 3600 },
+      '/security': { isr: 3600 },
+      '/rss.xml': { isr: 600 },
+    }
 
 export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
@@ -64,6 +101,7 @@ export default defineNuxtConfig({
           content: 'DeFlow is the institutional settlement layer for digital asset dealflows. Non-custodial smart escrow, compliant identity verification, and programmable settlement.',
         },
         { name: 'theme-color', content: '#0B0B14' },
+        ...(sanityPreviewEnabled ? [{ name: 'robots', content: 'noindex, nofollow' }] : []),
         // Open Graph
         { property: 'og:type', content: 'website' },
         { property: 'og:site_name', content: 'DeFlow Labs' },
@@ -114,7 +152,7 @@ export default defineNuxtConfig({
     apiVersion: sanityApiVersion,
     perspective: 'published',
     useCdn: true,
-    visualEditing: sanityReadToken
+    visualEditing: sanityPreviewEnabled
       ? {
           mode: 'live-visual-editing',
           token: sanityReadToken,
@@ -136,8 +174,13 @@ export default defineNuxtConfig({
 
   // Icon configuration — Lucide icons for Atmospheric Institutional design
   icon: {
+    provider: 'none',
     serverBundle: 'local',
     collections: ['lucide'],
+    clientBundle: {
+      scan: true,
+      sizeLimitKb: 128,
+    },
   },
 
   // Font configuration — Geist (primary) + Geist Mono (data)
@@ -150,7 +193,7 @@ export default defineNuxtConfig({
 
   // Sitemap configuration — static + dynamic blog routes from Sanity
   sitemap: {
-    zeroRuntime: true,
+    zeroRuntime: false,
     sources: ['/api/__sitemap__/urls'],
     urls: [
       '/',
@@ -182,6 +225,8 @@ export default defineNuxtConfig({
     contactEmail: process.env.CONTACT_EMAIL || 'contact@deflowlabs.io',
     piiSaltSecret: process.env.PII_SALT_SECRET || '',
     postgresUrl: process.env.POSTGRES_URL || '',
+    sanityRevalidateSecret: process.env.SANITY_REVALIDATE_SECRET || '',
+    vercelIsrBypassToken: process.env.VERCEL_ISR_BYPASS_TOKEN || '',
     public: {
       // Client-accessible
       turnstileSiteKey: process.env.NUXT_PUBLIC_TURNSTILE_SITE_KEY || '',
@@ -189,22 +234,13 @@ export default defineNuxtConfig({
       sanityProjectId,
       sanityDataset,
       sanityApiVersion,
+      sanityPreviewEnabled,
     },
   },
 
   // Route rules for performance — ISR on Vercel (no build-time prerendering required)
   routeRules: {
-    '/': { isr: 3600 },
-    '/product': { isr: 3600 },
-    '/about': { isr: 3600 },
-    '/labs': { isr: 3600 },
-    '/blog': { isr: 600 },
-    '/blog/**': { isr: 3600 },
-    '/legal/**': { isr: 86400 },
-    '/waitlist': { isr: 3600 },
-    '/for-institutions': { isr: 3600 },
-    '/security': { isr: 3600 },
-    '/rss.xml': { isr: 600 },
+    ...contentRouteRules,
     // DFL-032: Redirect intuitive alias to canonical route
     '/institutions': { redirect: { to: '/for-institutions', statusCode: 301 } },
   },
@@ -223,14 +259,27 @@ export default defineNuxtConfig({
   // Nitro server configuration
   nitro: {
     preset: 'vercel',
+    vercel: {
+      config: {
+        bypassToken: process.env.VERCEL_ISR_BYPASS_TOKEN,
+      },
+    },
     // DFL-010: Security headers — remove framework fingerprint, add defense-in-depth
     routeRules: {
       '/**': {
         headers: {
-          'Content-Security-Policy': `frame-ancestors 'self' ${studioOrigin}`,
+          'Content-Security-Policy': sanityPreviewEnabled
+            ? `frame-ancestors 'self' ${studioOrigin}`
+            : "frame-ancestors 'self'",
           'X-Content-Type-Options': 'nosniff',
           'Referrer-Policy': 'strict-origin-when-cross-origin',
           'Permissions-Policy': 'camera=(), microphone=(), geolocation=()',
+          ...(sanityPreviewEnabled
+            ? {
+                'Cache-Control': 'private, no-store, max-age=0',
+                'X-Robots-Tag': 'noindex, nofollow',
+              }
+            : {}),
         },
       },
     },
