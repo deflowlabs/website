@@ -8,7 +8,7 @@ The public [deflowlabs.io](https://deflowlabs.io) application, built with Nuxt 4
 ## What this repository owns
 
 - Public marketing and legal pages.
-- Blog, announcement, Partner and Labs rendering from Sanity.
+- Blog, website-banner, public Partner and Labs rendering from Sanity.
 - Accessible Portable Text rendering and authenticated live visual editing.
 - Waitlist and contact APIs.
 - SEO, RSS, sitemap, ISR and response security headers.
@@ -16,9 +16,9 @@ The public [deflowlabs.io](https://deflowlabs.io) application, built with Nuxt 4
 The sibling `/studio` owns Sanity schemas/editor UX. `/docs` is the separate static Nuxt Content application.
 
 ```text
-Sanity Studio ──► Sanity dataset ──► published Sanity CDN queries
+Sanity Studio ──► Sanity dataset ──► published CDN ──► deflowlabs.io ISR
        │                    │
-       └─ Presentation ─────┴─► authenticated Visual Editing proxy
+       └─ Presentation ─────┴─► preview.deflowlabs.io (private/no-store)
                                       │
 Browser ──► Nuxt SSR/ISR ─────────────┼─► rendered marketing content
    │                                  │
@@ -75,8 +75,11 @@ Open `http://localhost:3000`. Published Sanity pages need the project, dataset a
 | `NUXT_SANITY_PROJECT_ID` | Sanity project ID (`i34vbeac` currently) | Public configuration |
 | `NUXT_SANITY_DATASET` | `production` or isolated preview dataset | Public configuration |
 | `NUXT_SANITY_API_VERSION` | Pinned contract date, `2026-08-17` | Public configuration |
-| `NUXT_SANITY_STUDIO_ORIGIN` | Exact Studio origin allowed to frame preview | Public configuration |
-| `SANITY_API_READ_TOKEN` | Least-privilege Viewer token for server-only draft reads and preview-secret validation | **Server secret** |
+| `NUXT_SANITY_PREVIEW_ENABLED` | `true` only on the dedicated preview deployment; `false` in production | Public configuration |
+| `NUXT_SANITY_STUDIO_ORIGIN` | Exact Studio origin allowed to frame the dedicated preview site | Public configuration |
+| `SANITY_API_READ_TOKEN` | Least-privilege Viewer token for server-only draft reads | **Preview server secret only** |
+| `SANITY_REVALIDATE_SECRET` | Shared high-entropy signing secret for the Sanity publish webhook | **Server secret** |
+| `VERCEL_ISR_BYPASS_TOKEN` | Vercel token used by the signed endpoint to purge affected ISR routes | **Server secret** |
 
 ### Forms and application
 
@@ -107,20 +110,39 @@ Page/component → useSanityQuery → checked-in GROQ
 → published perspective → Sanity CDN
 ```
 
-Presentation validates Sanity's signed preview URL, sets a random `HttpOnly`, `SameSite=None`, secure production cookie and uses the module's protected server proxy for draft queries. The browser never receives the Viewer token. Source maps and stega metadata enable click-to-edit overlays only inside the authenticated preview session and are stripped when copied.
+Production has `NUXT_SANITY_PREVIEW_ENABLED=false`, no Viewer token, no Visual Editing endpoints or stega configuration, and permits framing only by itself. Presentation targets the separate `https://preview.deflowlabs.io` deployment. That deployment has preview enabled, a server-only Viewer token, private/no-store responses, no ISR and global `noindex, nofollow`. The browser never receives the token.
 
 | File | Responsibility |
 |---|---|
 | `app/utils/sanity-queries.ts` | GROQ projections, filters and deterministic ordering |
 | `nuxt.config.ts` | Sanity client, secure preview proxy, Visual Editing and framing policy |
+| `app/components/SanityImage.vue` | Crop/hotspot-aware responsive Sanity images |
 | `app/components/PortableContent.vue` | Accessible rich-content rendering |
 | `app/types/sanity.generated.ts` | Generated schema/query types; do not edit |
 
-Public queries exclude drafts and future publication dates, deterministically select featured/active records and order Labs by `displayOrder`.
+Public queries exclude drafts and future publication dates. Featured placement requires `isFeatured == true`; populated categories come from referenced published posts; private Partners are projected as `null`; Labs uses explicit `displayOrder`.
+
+### CMS-to-website field contract
+
+| Content | Field | Classification | Website behaviour |
+|---|---|---|---|
+| Post | title, slug, excerpt, body, publishedAt, readingTime | Rendered | Blog cards/detail, dates and reading time |
+| Post | categories | Rendered + behavioural | First category is the badge; every category is filterable; slug `announcements` controls the leading announcement-story slot |
+| Post | isFeatured | Behavioural | Exactly one explicit featured slot; never inferred from recency |
+| Post | coverImage/crop/hotspot/alt | Rendered | Responsive 16:9 card/detail images |
+| Post | SEO title, description, image, noIndex | Behavioural | Metadata, social preview, robots and sitemap inclusion |
+| Author | name, slug, portrait, role, biography, public links | Rendered | Attribution and `/blog/author/[slug]` |
+| Labs project | title, slug, summary, details, cover, tags, status, dates | Rendered | Labs cards and `/labs/[slug]` |
+| Labs project | displayOrder | Behavioural | Stable Labs ordering |
+| Labs project | CTA label, URL, style | Rendered + behavioural | Existing primary, secondary or text-link treatment |
+| Partner | name, logo, URL | Rendered conditionally | Exposed only when `isPublic == true` |
+| Partner | internalNote | Internal-only | Never queried by the website |
+| Website banner | text, tone, CTA, isActive, revision | Rendered + behavioural | Client-fetched banner, accessible tone/style and revision-keyed dismissal |
+| Legacy fields | old SEO, Labs partner text, banner link/colour | Legacy | Read-only migration compatibility; never used as a public fallback |
 
 ## Running website and Studio together
 
-1. Set the website’s Sanity values, Viewer token and `NUXT_SANITY_STUDIO_ORIGIN=http://localhost:3333`.
+1. Set `NUXT_SANITY_PREVIEW_ENABLED=true`, the website’s Sanity values, Viewer token and `NUXT_SANITY_STUDIO_ORIGIN=http://localhost:3333`.
 2. Start website on port 3000.
 3. Set Studio `SANITY_STUDIO_PREVIEW_URL=http://localhost:3000` and start it on 3333.
 4. Add both exact origins to Sanity CORS; enable credentials only where required.
@@ -153,11 +175,26 @@ Coordinate schema and consumer changes in this order:
 | `POST` | `/api/waitlist` | Verify Turnstile, hash email and store deduplicated waitlist entry |
 | `GET` | `/api/waitlist/count` | Return aggregate waitlist count |
 | `POST` | `/api/contact` | Verify Turnstile and deliver contact email |
+| `POST` | `/api/sanity/revalidate` | Verify a signed Sanity publish event and purge affected Vercel ISR routes |
 | `GET` | `/preview/enable` | Module-owned signed-secret validation and secure preview activation |
 | `GET` | `/preview/disable` | Module-owned preview-state removal |
 | `POST` | `/_sanity/visual-editing/fetch` | Protected server-only draft query forwarding for Presentation |
 
-New endpoints must validate input, keep secrets in runtime config, rate-limit plausible abuse, return minimal errors, avoid PII logs and include tests. Update this table.
+The preview routes exist only when `NUXT_SANITY_PREVIEW_ENABLED=true`. New endpoints must validate input, keep secrets in runtime config, rate-limit plausible abuse, return minimal errors, avoid PII logs and include tests.
+
+### Sanity publish webhook
+
+Create one Sanity webhook for published `create`, `update` and `delete` events. Enable the webhook secret, use `SANITY_REVALIDATE_SECRET`, target `https://deflowlabs.io/api/sanity/revalidate`, and use this projection:
+
+```groq
+{
+  "operation": delta::operation(),
+  "before": before(){_id, _type, "slug": slug.current},
+  "after": after(){_id, _type, "slug": slug.current}
+}
+```
+
+The endpoint verifies Sanity's signature plus `sanity-project-id` and `sanity-dataset`, rejects drafts and unknown types, and sends Vercel's `x-prerender-revalidate` header only for affected blog, author, Labs, RSS and sitemap routes. Delivery is safe to repeat.
 
 ## Verification
 
@@ -195,9 +232,19 @@ The website is SSR/ISR, not the static `/docs` build. `vercel.json` is authorita
 
 ### Environment scoping
 
-- **Production:** production dataset/domains, production Turnstile/Resend/database and `NUXT_PUBLIC_SITE_URL=https://deflowlabs.io`.
-- **Preview:** isolated dataset, stable protected Studio/site origins, test keys and separate database. Never let arbitrary preview branches write to production waitlist data.
+- **Production (`deflowlabs.io`):** `NUXT_SANITY_PREVIEW_ENABLED=false`; no `SANITY_API_READ_TOKEN`; production dataset, revalidation secrets, Turnstile/Resend/database and canonical URL.
+- **Dedicated Presentation (`preview.deflowlabs.io`):** `NUXT_SANITY_PREVIEW_ENABLED=true`; exact Studio origin; Viewer token; private/no-store/noindex responses and no ISR. Use a stable protected deployment, not an arbitrary branch URL.
+- **Ordinary Vercel Preview:** preview disabled unless it is the dedicated Presentation project; use test form keys and separate persistence.
 - **Development:** local origins and authorised development credentials.
+
+| Variable | Public production | Dedicated Presentation | Local Presentation |
+|---|---|---|---|
+| `NUXT_PUBLIC_SITE_URL` | `https://deflowlabs.io` | `https://preview.deflowlabs.io` | `http://localhost:3000` |
+| `NUXT_SANITY_PREVIEW_ENABLED` | `false` | `true` | `true` |
+| `NUXT_SANITY_STUDIO_ORIGIN` | Not required | `https://studio.deflowlabs.io` | `http://localhost:3333` |
+| `SANITY_API_READ_TOKEN` | **Unset** | Viewer token | Viewer token |
+| `SANITY_REVALIDATE_SECRET` | Required | Required for production-equivalent builds | Development value |
+| `VERCEL_ISR_BYPASS_TOKEN` | Required | Configured but unused because ISR is disabled | Development value |
 
 Environment changes apply only to new deployments. Redeploy after updates.
 
@@ -207,10 +254,11 @@ External-service checklist:
 2. Authorise production/stable preview hostnames in Turnstile.
 3. Verify the Resend sending domain and recipient.
 4. Connect Postgres and apply the waitlist table migration.
-5. Create a least-privilege Sanity Viewer token.
-6. Match Studio Preview URL and website Studio origin per environment.
+5. Create a least-privilege Sanity Viewer token for the dedicated preview deployment only.
+6. Match Studio Preview URL and website Studio origin exactly.
+7. Configure the signed publish webhook and Vercel bypass token, then publish a test update and confirm affected routes refresh.
 
-Before promotion, run the full verification commands, deploy Preview, complete website/content/legal/admin UAT, then promote. Account for ISR revalidation when checking new content instead of repeatedly republishing.
+Before promotion, run the full verification commands, deploy the dedicated preview site, complete website/content/legal/admin UAT, then promote. After the first isolation release, purge the existing production Vercel ISR cache once so no historical preview/stega payload survives.
 
 ## Security and recovery
 
