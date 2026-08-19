@@ -13,9 +13,10 @@
 import { h } from 'vue'
 import { PortableText, type PortableTextComponents } from '@portabletext/vue'
 import type { TypedObject } from '@portabletext/types'
+import SanityImage from './SanityImage.vue'
 
 interface ImageValue {
-  url?: string
+  asset?: { _id?: string, _ref?: string, url?: string }
   alt?: string
   caption?: string
 }
@@ -46,11 +47,13 @@ const components: PortableTextComponents = {
   types: {
     imageWithAlt: ({ value }) => {
       const image = value as ImageValue
-      if (!image.url || !image.alt) return h('p', { role: 'status' }, 'Image unavailable.')
-      return h('figure', [
-        h('img', { src: image.url, alt: image.alt, loading: 'lazy', decoding: 'async' }),
-        image.caption ? h('figcaption', image.caption) : null,
-      ])
+      if (!image.asset || !image.alt) return h('p', { role: 'status' }, 'Image unavailable.')
+      return h(SanityImage, {
+        image,
+        alt: image.alt,
+        caption: image.caption,
+        sizes: '(max-width: 768px) 100vw, 720px',
+      })
     },
     code: ({ value }) => {
       const block = value as CodeValue

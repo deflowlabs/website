@@ -57,52 +57,48 @@
         </div>
 
         <div class="labs-projects__grid">
-          <div
+          <NuxtLink
             v-for="(project, projectIndex) in projects"
             :key="project.slug || project.title || 'project'"
+            :to="`/labs/${clean(project.slug)}`"
             class="labs-project glass-card"
             :data-sanity="project._id && !project._id.startsWith('placeholder-')
               ? encodeDataAttribute(`[${projectIndex}].title`)
               : undefined"
           >
-            <div class="labs-project__header">
-              <span
-                class="badge"
-                :class="{
-                  'badge-success': project.status === 'active',
-                  'badge-warning': project.status === 'upcoming',
-                  'badge-info': project.status === 'completed',
-                }"
-              >
-                {{ (project.status || 'upcoming').charAt(0).toUpperCase() + (project.status || 'upcoming').slice(1) }}
+            <SanityImage
+              v-if="project.coverImage"
+              class="labs-project__cover"
+              :image="project.coverImage"
+              :alt="project.coverImage.alt || ''"
+            />
+            <div class="labs-project__body">
+              <div class="labs-project__header">
+                <span
+                  class="badge"
+                  :class="{
+                    'badge-success': clean(project.status) === 'active',
+                    'badge-warning': clean(project.status) === 'upcoming',
+                    'badge-info': clean(project.status) === 'completed',
+                  }"
+                >
+                  {{ formatStatus(project.status) }}
+                </span>
+              </div>
+              <h3>{{ project.title }}</h3>
+              <p v-if="project.partner?.name" class="labs-project__partner">In collaboration with {{ project.partner.name }}</p>
+              <p class="labs-project__desc">{{ project.description }}</p>
+              <div v-if="project.tags?.length" class="labs-project__tags">
+                <span v-for="tag in project.tags" :key="tag" class="labs-project__tag">{{ tag }}</span>
+              </div>
+              <span class="labs-project__link">
+                Explore project
+                <Icon name="lucide:arrow-right" size="14" />
               </span>
             </div>
-            <h3>{{ project.title }}</h3>
-            <p v-if="project.partner" class="labs-project__partner">{{ project.partner }}</p>
-            <p class="labs-project__desc">{{ project.description }}</p>
-            <div v-if="project.tags?.length" class="labs-project__tags">
-              <span v-for="tag in project.tags" :key="tag" class="labs-project__tag">{{ tag }}</span>
-            </div>
-            <a
-              v-if="safeExternalUrl(project.cta?.url || project.publicationUrl)"
-              :href="safeExternalUrl(project.cta?.url || project.publicationUrl)"
-              target="_blank"
-              rel="noopener"
-              class="labs-project__link"
-            >
-              {{ project.cta?.label || 'View publication' }}
-              <Icon name="lucide:arrow-right" size="14" />
-            </a>
-          </div>
-
-          <!-- Coming Soon Placeholder -->
-          <div class="labs-project glass-card labs-project--placeholder">
-            <div class="labs-project__placeholder">
-              <Icon name="lucide:plus" size="24" />
-              <p>More projects coming soon</p>
-            </div>
-          </div>
+          </NuxtLink>
         </div>
+        <p v-if="!projects.length" class="labs-projects__empty">New research initiatives will be published here.</p>
       </div>
     </section>
 
@@ -125,12 +121,12 @@
 <script setup lang="ts">
 /**
  * Labs page — R&D arm of DeFlow Labs.
- * Fetches projects from Sanity CMS, falls back to placeholder.
+ * Fetches public projects from Sanity CMS and provides a curated empty state.
  * Includes AI pillar and FCT recognition badge.
  */
 import { LABS_PROJECTS_QUERY } from '~/utils/sanity-queries'
 import type { LABS_PROJECTS_QUERY_RESULT } from '~/types/sanity.generated'
-import { safeExternalUrl } from '~/utils/safe-url'
+import { stegaClean } from '@sanity/client/stega'
 
 useHead({
   title: 'Labs — DeFlow Labs',
@@ -142,37 +138,19 @@ useHead({
 useCanonical()
 
 const visualEditing = useSanityVisualEditingState()
-const previewParams = reactive({ preview: visualEditing?.enabled ?? false })
+const preview = computed(() => visualEditing?.enabled ?? false)
+const previewParams = { preview }
 const {
   data: sanityProjects,
   encodeDataAttribute,
 } = await useSanityQuery<LABS_PROJECTS_QUERY_RESULT>(LABS_PROJECTS_QUERY, previewParams)
 
-watch(
-  () => visualEditing?.enabled,
-  enabled => { previewParams.preview = enabled ?? false },
-)
-
-const placeholderProject = [
-  {
-    _id: 'placeholder-research-project-1',
-    slug: 'research-project-1',
-    title: 'Research Project #1',
-    status: 'upcoming' as const,
-    partner: 'Partner to be announced',
-    description: 'Details on our first research collaboration will be shared soon. This project focuses on advancing settlement infrastructure for institutional digital asset markets.',
-    tags: ['Settlement', 'Infrastructure'],
-    publicationUrl: null,
-    cta: null,
-  },
-]
-
-type LabsCard = Pick<LABS_PROJECTS_QUERY_RESULT[number], '_id' | 'slug' | 'title' | 'status' | 'partner' | 'description' | 'tags' | 'publicationUrl' | 'cta'>
-
-const projects = computed<LabsCard[]>(() => {
-  const p = sanityProjects.value
-  return p?.length ? p : placeholderProject
-})
+const projects = computed(() => sanityProjects.value || [])
+function clean<T>(value: T) { return stegaClean(value) as T }
+const formatStatus = (status: string | null) => {
+  const value = clean(status || 'upcoming')
+  return value.charAt(0).toUpperCase() + value.slice(1)
+}
 
 const pillars = [
   {
@@ -293,11 +271,14 @@ const pillars = [
 }
 
 .labs-project {
-  padding: 2rem;
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  overflow: hidden;
+  text-decoration: none;
 }
+
+.labs-project__cover { border-radius: 0; }
+.labs-project__body { display: flex; flex: 1; flex-direction: column; gap: .75rem; padding: 1.5rem; }
 
 .labs-project__header {
   display: flex;
@@ -351,24 +332,7 @@ const pillars = [
   color: #FFFFFF;
 }
 
-.labs-project--placeholder {
-  border-style: dashed;
-  min-height: 200px;
-}
-
-.labs-project__placeholder {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  flex: 1;
-  gap: 0.5rem;
-  color: rgba(255, 255, 255, 0.5);
-}
-
-.labs-project__placeholder p {
-  font-size: 0.875rem;
-}
+.labs-projects__empty { grid-column: 1 / -1; text-align: center; color: var(--color-muted-fg); }
 
 @media (max-width: 1024px) {
   .labs-mission__grid {

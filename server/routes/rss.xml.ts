@@ -8,7 +8,7 @@
  */
 import { createClient } from '@sanity/client'
 
-const RSS_QUERY = `*[_type == "post" && defined(publishedAt) && !(_id in path("drafts.**")) && publishedAt <= now()] | order(publishedAt desc, _id asc) [0...50] {
+const RSS_QUERY = `*[_type == "post" && defined(publishedAt) && !(_id in path("drafts.**")) && publishedAt <= now() && coalesce(seo.noIndex, false) != true] | order(publishedAt desc, _id asc) [0...50] {
   title,
   "slug": slug.current,
   excerpt,
@@ -16,6 +16,15 @@ const RSS_QUERY = `*[_type == "post" && defined(publishedAt) && !(_id in path("d
   "author": author->name,
   "category": categories[0]->title
 }`
+
+interface RssPost {
+  title: string
+  slug: string
+  excerpt?: string | null
+  publishedAt?: string | null
+  author?: string | null
+  category?: string | null
+}
 
 export default defineEventHandler(async (event) => {
   const config = useRuntimeConfig()
@@ -32,7 +41,7 @@ export default defineEventHandler(async (event) => {
     useCdn: true,
   })
 
-  const posts = await client.fetch(RSS_QUERY)
+  const posts = await client.fetch<RssPost[]>(RSS_QUERY)
 
   const siteUrl = 'https://deflowlabs.io'
   const now = new Date().toUTCString()
@@ -45,7 +54,7 @@ export default defineEventHandler(async (event) => {
       .replace(/"/g, '&quot;')
 
   const items = (posts || [])
-    .map((post: any) => `
+    .map(post => `
     <item>
       <title>${esc(post.title)}</title>
       <link>${siteUrl}/blog/${post.slug}</link>

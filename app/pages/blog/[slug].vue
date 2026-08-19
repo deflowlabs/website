@@ -1,231 +1,175 @@
 <template>
-  <div
-    class="article-page"
-    :data-sanity="encodeDataAttribute('title')"
-  >
-    <section class="article-hero section">
-      <div class="container">
-        <div class="article-hero__inner">
-          <NuxtLink to="/blog" class="article-back">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
-            Back to Blog
+  <article v-if="article" class="article-page" :data-sanity="encodeDataAttribute('title')">
+    <header class="article-hero section">
+      <div class="container article-hero__inner">
+        <NuxtLink to="/blog" class="article-back">
+          <Icon name="lucide:arrow-left" size="16" aria-hidden="true" />
+          Back to Blog
+        </NuxtLink>
+        <span v-if="article.category?.title" class="badge badge-info">{{ article.category.title }}</span>
+        <h1>{{ article.title }}</h1>
+        <p class="article-summary">{{ article.excerpt }}</p>
+        <div class="article-meta">
+          <NuxtLink v-if="article.author?.slug" :to="`/blog/author/${clean(article.author.slug)}`" class="article-author">
+            <SanityImage
+              v-if="article.author.avatar"
+              :image="article.author.avatar"
+              :alt="article.author.avatar.alt || ''"
+              :aspect-ratio="1"
+              sizes="40px"
+            />
+            <span>
+              <strong>{{ article.author.name }}</strong>
+              <small v-if="article.author.role">{{ article.author.role }}</small>
+            </span>
           </NuxtLink>
-
-          <template v-if="article">
-            <span class="badge badge-info">{{ article.category || 'Product' }}</span>
-            <h1>{{ article.title }}</h1>
-            <div class="article-meta">
-              <span>{{ article.author?.name || 'DeFlow Labs' }}</span>
-              <span>·</span>
-              <span>{{ formatDate(article.publishedAt) }}</span>
-            </div>
-          </template>
+          <span v-else>{{ article.author?.name || 'DeFlow Labs' }}</span>
+          <span aria-hidden="true">·</span>
+          <time v-if="article.publishedAt" :datetime="clean(article.publishedAt)">{{ formattedDate }}</time>
+          <span v-if="article.readingTime">· {{ article.readingTime }} min read</span>
         </div>
       </div>
-    </section>
+    </header>
 
-    <section v-if="article" class="article-body section" style="padding-top: 0">
+    <section class="article-body section">
       <div class="container">
-        <div class="article-content">
-          <div v-if="article.body" class="prose">
-            <PortableContent :value="article.body" />
-          </div>
-
-          <!-- No body content yet -->
-          <p v-else class="text-muted" style="font-style: italic; margin-top: 2rem">
-            Full article content will be published soon.
-          </p>
+        <SanityImage
+          v-if="article.coverImage"
+          class="article-cover"
+          :image="article.coverImage"
+          :alt="article.coverImage.alt || ''"
+          sizes="(max-width: 960px) 100vw, 960px"
+          priority
+        />
+        <div class="article-content prose">
+          <PortableContent v-if="article.body?.length" :value="article.body" />
+          <p v-else class="text-muted"><em>Full article content will be published soon.</em></p>
         </div>
       </div>
     </section>
-  </div>
+  </article>
 </template>
 
 <script setup lang="ts">
-/**
- * Single blog article page.
- * Fetches full article by slug from Sanity CMS via GROQ.
- * Returns 404 for unknown/unpublished slugs.
- */
+/** Published article page with reactive CMS SEO and linked author attribution. */
+import { stegaClean } from '@sanity/client/stega'
 import { POST_BY_SLUG_QUERY } from '~/utils/sanity-queries'
 import type { POST_BY_SLUG_QUERY_RESULT } from '~/types/sanity.generated'
 
 const route = useRoute()
-const slug = route.params.slug as string
-
+const slug = stegaClean(String(route.params.slug))
 const visualEditing = useSanityVisualEditingState()
-const queryParams = reactive({ slug, preview: visualEditing?.enabled ?? false })
-const {
-  data: sanityArticle,
-  encodeDataAttribute,
-} = await useSanityQuery<POST_BY_SLUG_QUERY_RESULT>(POST_BY_SLUG_QUERY, queryParams, {
-  key: `post-${slug}`,
-})
-
-watch(
-  () => visualEditing?.enabled,
-  enabled => { queryParams.preview = enabled ?? false },
+const preview = computed(() => visualEditing?.enabled ?? false)
+const queryParams = { slug, preview }
+const { data: sanityArticle, encodeDataAttribute } = await useSanityQuery<POST_BY_SLUG_QUERY_RESULT>(
+  POST_BY_SLUG_QUERY,
+  queryParams,
+  { key: `post-${slug}` },
 )
 
-// Return a proper 404 for unknown slugs instead of fabricating content (DFL-015)
 if (!sanityArticle.value) {
-  throw createError({
-    statusCode: 404,
-    statusMessage: 'Article not found',
-    fatal: true,
-  })
+  throw createError({ statusCode: 404, statusMessage: 'Article not found', fatal: true })
 }
 
 const article = computed(() => sanityArticle.value as NonNullable<POST_BY_SLUG_QUERY_RESULT>)
+function clean<T>(value: T) { return stegaClean(value) as T }
+const imageUrl = useSanityImageUrl()
+const config = useRuntimeConfig()
+const canonicalUrl = `${config.public.siteUrl}/blog/${slug}`
+const sharingImage = computed(() => imageUrl(article.value.seo?.image || article.value.coverImage) || `${config.public.siteUrl}/og-image.png`)
+const formattedDate = computed(() => article.value.publishedAt
+  ? new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }).format(new Date(clean(article.value.publishedAt)))
+  : '')
 
-useHead({
-  title: `${article.value.title || 'Article'} — DeFlow Labs Blog`,
-  meta: [
-    {
-      name: 'description',
-      content: article.value.seoDescription || article.value.excerpt || '',
-    },
-  ],
+useHead(() => {
+  const title = clean(article.value.seo?.title || article.value.title || 'Article')
+  const description = clean(article.value.seo?.description || article.value.excerpt || '')
+  return {
+    title: `${title} — DeFlow Labs Blog`,
+    meta: [
+      { name: 'description', content: description },
+      { name: 'robots', content: article.value.seo?.noIndex ? 'noindex, follow' : 'index, follow' },
+      { property: 'og:type', content: 'article' },
+      { property: 'og:title', content: title },
+      { property: 'og:description', content: description },
+      { property: 'og:image', content: sharingImage.value },
+      { name: 'twitter:title', content: title },
+      { name: 'twitter:description', content: description },
+      { name: 'twitter:image', content: sharingImage.value },
+    ],
+    script: [{
+      type: 'application/ld+json',
+      innerHTML: JSON.stringify({
+        '@context': 'https://schema.org',
+        '@type': 'BlogPosting',
+        headline: title,
+        description,
+        datePublished: clean(article.value.publishedAt || ''),
+        dateModified: article.value._updatedAt,
+        author: { '@type': 'Person', name: clean(article.value.author?.name || 'DeFlow Labs') },
+        publisher: { '@type': 'Organization', name: 'DeFlow Labs', logo: { '@type': 'ImageObject', url: `${config.public.siteUrl}/deflow-logo.svg` } },
+        image: sharingImage.value,
+        url: canonicalUrl,
+        mainEntityOfPage: canonicalUrl,
+      }),
+    }],
+  }
 })
 
 useCanonical()
-
-// Per-article OG image (falls back to global og-image.png from nuxt.config)
-if (article.value.coverImage) {
-  useHead({
-    meta: [
-      { property: 'og:image', content: article.value.coverImage },
-      { name: 'twitter:image', content: article.value.coverImage },
-    ],
-  })
-}
-
-useStructuredData(createBlogPostSchema({
-  title: article.value.title || 'DeFlow Labs article',
-  excerpt: article.value.excerpt || '',
-  publishedAt: article.value.publishedAt || '',
-  author: article.value.author?.name ? { name: article.value.author.name } : null,
-  slug,
-}))
-
-/**
- * Formats a date string into a human-readable format.
- * Returns 'Coming Soon' if no date is provided.
- */
-function formatDate(dateStr: string | null): string {
-  if (!dateStr) return 'Coming Soon'
-  return new Date(dateStr).toLocaleDateString('en-US', {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-  })
-}
 </script>
 
 <style scoped>
 .article-hero__inner {
-  max-width: 720px;
   display: flex;
   flex-direction: column;
+  align-items: flex-start;
   gap: 1rem;
+  max-width: 820px;
 }
 
-.article-back {
+.article-back,
+.article-author {
   display: inline-flex;
   align-items: center;
-  gap: 0.375rem;
-  font-size: 0.8125rem;
-  color: rgba(255, 255, 255, 0.4);
+  gap: 0.5rem;
+  color: rgba(255, 255, 255, 0.55);
   text-decoration: none;
-  transition: color 0.2s ease;
 }
 
-.article-back:hover {
-  color: #FFFFFF;
-}
+.article-back { font-size: 0.8125rem; }
+.article-back:hover,
+.article-author:hover { color: #fff; }
+.article-back:focus-visible,
+.article-author:focus-visible { outline: 2px solid var(--color-ring); outline-offset: 3px; }
 
-.article-hero h1 {
-  font-size: clamp(1.75rem, 4vw, 2.5rem);
-}
+.article-hero h1 { max-width: 18ch; font-size: clamp(2rem, 5vw, 3.5rem); }
+.article-summary { max-width: 65ch; font-size: 1.05rem; line-height: 1.7; }
 
 .article-meta {
   display: flex;
+  align-items: center;
+  flex-wrap: wrap;
   gap: 0.5rem;
+  color: rgba(255, 255, 255, 0.45);
   font-size: 0.8125rem;
-  color: rgba(255, 255, 255, 0.4);
 }
 
-.article-content {
-  max-width: 720px;
-  font-size: 1.0625rem;
-  line-height: 1.8;
-}
+.article-author :deep(.sanity-image) { width: 40px; border-radius: 50%; }
+.article-author span { display: flex; flex-direction: column; }
+.article-author strong { color: rgba(255, 255, 255, 0.85); }
+.article-author small { color: rgba(255, 255, 255, 0.45); }
 
-.article-content p {
-  color: rgba(255, 255, 255, 0.7);
-}
+.article-body { padding-top: 0; }
+.article-cover { max-width: 960px; margin: 0 auto 3rem; border-radius: var(--radius-card); }
+.article-content { max-width: 720px; margin: 0 auto; font-size: 1.0625rem; line-height: 1.8; }
 
-/* Portable text prose styling */
-.prose :deep(h2) {
-  font-size: 1.5rem;
-  margin-top: 2.5rem;
-  margin-bottom: 0.75rem;
-}
-
-.prose :deep(h3) {
-  font-size: 1.25rem;
-  margin-top: 2rem;
-  margin-bottom: 0.5rem;
-}
-
-.prose :deep(p) {
-  color: rgba(255, 255, 255, 0.7);
-  margin-bottom: 1.25rem;
-}
-
-.prose :deep(a) {
-  color: var(--color-foreground);
-  text-decoration: underline;
-  text-underline-offset: 2px;
-}
-
-.prose :deep(code) {
-  font-family: var(--font-mono);
-  background: rgba(255, 255, 255, 0.06);
-  padding: 0.125rem 0.375rem;
-  border-radius: 4px;
-  font-size: 0.9em;
-}
-
-.prose :deep(pre) {
-  background: rgba(0, 0, 0, 0.3);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  border-radius: var(--radius-card);
-  padding: 1.25rem;
-  overflow-x: auto;
-  margin: 1.5rem 0;
-}
-
-.prose :deep(blockquote) {
-  border-left: 3px solid rgba(255, 255, 255, 0.15);
-  padding-left: 1rem;
-  margin: 1.5rem 0;
-  color: rgba(255, 255, 255, 0.5);
-}
-
-.prose :deep(ul), .prose :deep(ol) {
-  padding-left: 1.5rem;
-  margin-bottom: 1.25rem;
-  color: rgba(255, 255, 255, 0.7);
-}
-
-.prose :deep(li) {
-  margin-bottom: 0.5rem;
-}
-
-.prose :deep(img) {
-  border-radius: var(--radius-card);
-  margin: 1.5rem 0;
-  max-width: 100%;
-}
+.prose :deep(h2) { margin: 2.5rem 0 0.75rem; font-size: 1.5rem; }
+.prose :deep(h3) { margin: 2rem 0 0.5rem; font-size: 1.25rem; }
+.prose :deep(p) { margin-bottom: 1.25rem; color: rgba(255, 255, 255, 0.72); }
+.prose :deep(a) { color: var(--color-foreground); text-decoration: underline; text-underline-offset: 2px; }
+.prose :deep(pre) { overflow-x: auto; margin: 1.5rem 0; padding: 1.25rem; border: 1px solid rgba(255, 255, 255, 0.06); border-radius: var(--radius-card); background: rgba(0, 0, 0, 0.3); }
+.prose :deep(blockquote) { margin: 1.5rem 0; padding-left: 1rem; border-left: 3px solid rgba(255, 255, 255, 0.15); color: rgba(255, 255, 255, 0.55); }
+.prose :deep(ul), .prose :deep(ol) { margin-bottom: 1.25rem; padding-left: 1.5rem; color: rgba(255, 255, 255, 0.72); }
+.prose :deep(li) { margin-bottom: 0.5rem; }
 </style>

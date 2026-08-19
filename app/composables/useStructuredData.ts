@@ -7,7 +7,7 @@
  *
  * @param schema - A Schema.org-compliant JSON-LD object
  */
-export function useStructuredData(schema: Record<string, any>) {
+export function useStructuredData(schema: Record<string, unknown>) {
   useHead({
     script: [
       {
