@@ -52,7 +52,9 @@ export default defineNuxtConfig({
 
   app: {
     head: {
-      htmlAttrs: { lang: 'en' },
+      // DeFlow has no Flash content. Opt out of Ruffle browser-extension
+      // injection so its cross-frame probe cannot pollute Sanity Presentation.
+      htmlAttrs: { lang: 'en', 'data-ruffle-optout': '' },
       title: 'DeFlow Labs — Institutional Settlement Layer for Digital Asset Dealflows',
       meta: [
         { charset: 'utf-8' },

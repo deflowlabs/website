@@ -40,6 +40,7 @@ test('official visual editing replaces the custom query and cookie endpoints', a
   assert.match(config, /mode:\s*'live-visual-editing'/)
   assert.match(config, /keepStegaOnCopy:\s*false/)
   assert.match(config, /Content-Security-Policy.*frame-ancestors/s)
+  assert.match(config, /data-ruffle-optout/)
   assert.doesNotMatch(config, /X-Frame-Options|SANITY_PREVIEW_COOKIE_SECRET/)
 
   assert.equal(existsSync(new URL('../server/api/sanity/query.post.ts', import.meta.url)), false)

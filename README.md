@@ -229,6 +229,7 @@ Before promotion, run the full verification commands, deploy Preview, complete w
 - **Generated type is stale:** extract/typegen from sibling `/studio`; ensure queries remain under website `app` or `server`.
 - **Host-only build failure:** compare Node and exact environment names; check public/server prefixes and Nuxt Vercel preset.
 - **Fonts perform build-time network work:** migrate approved Geist assets to a local source and visually verify before removing provider configuration.
+- **`Unable to check top-level optout` in Presentation:** this is emitted by the Ruffle browser extension when it probes a cross-origin frame. The site declares `data-ruffle-optout` because DeFlow has no Flash content; confirm the current deployment includes it or disable Ruffle for DeFlow domains.
 
 ## Code and maintenance standard
 
