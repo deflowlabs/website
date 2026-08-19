@@ -96,7 +96,7 @@ onMounted(async () => {
  */
 function loadTurnstileScript(): Promise<void> {
   return new Promise((resolve, reject) => {
-    if ((window as any).turnstile) { resolve(); return }
+    if (window.turnstile) { resolve(); return }
     const script = document.createElement('script')
     script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit'
     script.async = true
@@ -108,8 +108,8 @@ function loadTurnstileScript(): Promise<void> {
 
 /** Renders the Turnstile widget inside the ref container. */
 function renderTurnstile() {
-  if (!turnstileRef.value || !(window as any).turnstile) return
-  ;(window as any).turnstile.render(turnstileRef.value, {
+  if (!turnstileRef.value || !window.turnstile) return
+  window.turnstile.render(turnstileRef.value, {
     sitekey: config.public.turnstileSiteKey,
     theme: 'dark',
     callback: (token: string) => { turnstileToken.value = token },
@@ -140,11 +140,14 @@ async function handleSubmit() {
     submitted.value = true
     signupCount.value++
   }
-  catch (err: any) {
-    error.value = err?.data?.message || 'Something went wrong. Please try again.'
+  catch (err: unknown) {
+    const message = typeof err === 'object' && err && 'data' in err
+      ? (err as { data?: { message?: unknown } }).data?.message
+      : undefined
+    error.value = typeof message === 'string' ? message : 'Something went wrong. Please try again.'
     // Reset Turnstile on failure
-    if ((window as any).turnstile && turnstileRef.value) {
-      ;(window as any).turnstile.reset(turnstileRef.value)
+    if (window.turnstile && turnstileRef.value) {
+      window.turnstile.reset(turnstileRef.value)
     }
   }
   finally {

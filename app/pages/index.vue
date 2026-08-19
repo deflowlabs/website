@@ -195,10 +195,18 @@
           <!-- Decorative chart lines -->
           <div class="cta__chart-visual" aria-hidden="true">
             <svg viewBox="0 0 400 120" fill="none" xmlns="http://www.w3.org/2000/svg" class="cta__chart-svg">
-              <path d="M0 100 Q50 95 100 80 T200 55 T300 35 T400 15" stroke="rgba(99, 102, 241, 0.4)" stroke-width="2"
-                fill="none" />
-              <path d="M0 110 Q50 105 100 95 T200 70 T300 50 T400 25" stroke="rgba(245, 158, 11, 0.3)" stroke-width="2"
-                fill="none" />
+              <path
+                d="M0 100 Q50 95 100 80 T200 55 T300 35 T400 15"
+                stroke="rgba(99, 102, 241, 0.4)"
+                stroke-width="2"
+                fill="none"
+              />
+              <path
+                d="M0 110 Q50 105 100 95 T200 70 T300 50 T400 25"
+                stroke="rgba(245, 158, 11, 0.3)"
+                stroke-width="2"
+                fill="none"
+              />
             </svg>
           </div>
           <div class="cta__body">
