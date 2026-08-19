@@ -1,7 +1,7 @@
 <template>
   <div class="layout">
-    <AnnouncementBanner @visibility-change="onBannerVisibility" />
-    <NavBar :announcement-offset="bannerVisible" />
+    <AnnouncementBanner @height-change="onBannerHeight" />
+    <NavBar :announcement-offset="bannerHeight" />
     <main :style="{ paddingTop: mainPadding }">
       <slot />
     </main>
@@ -13,17 +13,16 @@
 <script setup lang="ts">
 /**
  * Default layout — announcement banner + sticky glass navbar + content + full footer.
- * Owns the announcement visibility state and passes it to children via props.
- * Uses props instead of provide/inject to avoid parent→child direction issues.
+ * Owns the measured banner height so navigation and page content remain aligned.
  */
-const bannerVisible = ref(false)
+const bannerHeight = ref(0)
 
-function onBannerVisibility(visible: boolean) {
-  bannerVisible.value = visible
+function onBannerHeight(height: number) {
+  bannerHeight.value = height
 }
 
 const mainPadding = computed(() =>
-  bannerVisible.value ? 'calc(72px + 40px)' : '72px',
+  `${72 + bannerHeight.value}px`,
 )
 </script>
 

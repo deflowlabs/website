@@ -140,7 +140,7 @@
  * NavBar v3 — Mega-menu dropdown navigation with Lucide icons.
  * Glass blur effect on scroll. Accordion mobile menu.
  * Coming Soon pills for disabled items (Security, Docs, Careers).
- * Offset by 40px when announcement banner is visible.
+ * Uses the announcement banner's measured height as its top offset.
  */
 const NuxtLink = resolveComponent('NuxtLink')
 
@@ -191,7 +191,7 @@ const navGroups: NavGroup[] = [
 ]
 
 const props = defineProps<{
-  announcementOffset?: boolean
+  announcementOffset?: number
 }>()
 
 const isScrolled = ref(false)
@@ -199,8 +199,8 @@ const isMobileOpen = ref(false)
 const openDropdown = ref<string | null>(null)
 const mobileExpanded = ref<string | null>(null)
 
-// Announcement banner offset
-const navTop = computed(() => props.announcementOffset ? '40px' : '0')
+// Keep the fixed navigation directly below banners of any responsive height.
+const navTop = computed(() => `${props.announcementOffset || 0}px`)
 
 onMounted(() => {
   const handleScroll = () => {
