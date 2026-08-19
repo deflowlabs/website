@@ -15,53 +15,6 @@
 export declare const internalGroqTypeReferenceTo: unique symbol;
 
 // Source: schema.json
-export type SanityImageAssetReference = {
-  _ref: string;
-  _type: "reference";
-  _weak?: boolean;
-  [internalGroqTypeReferenceTo]?: "sanity.imageAsset";
-};
-
-export type Testimonial = {
-  _id: string;
-  _type: "testimonial";
-  _createdAt: string;
-  _updatedAt: string;
-  _rev: string;
-  quote?: string;
-  author?: string;
-  role?: string;
-  company?: string;
-  avatar?: {
-    asset?: SanityImageAssetReference;
-    media?: unknown;
-    hotspot?: SanityImageHotspot;
-    crop?: SanityImageCrop;
-    alt?: string;
-    _type: "image";
-  };
-  consentRecorded?: boolean;
-  consentNote?: string;
-  isPublic?: boolean;
-  displayOrder?: number;
-};
-
-export type SanityImageCrop = {
-  _type: "sanity.imageCrop";
-  top?: number;
-  bottom?: number;
-  left?: number;
-  right?: number;
-};
-
-export type SanityImageHotspot = {
-  _type: "sanity.imageHotspot";
-  x?: number;
-  y?: number;
-  height?: number;
-  width?: number;
-};
-
 export type Announcement = {
   _id: string;
   _type: "announcement";
@@ -82,6 +35,13 @@ export type Cta = {
   label?: string;
   url?: string;
   style?: "primary" | "secondary" | "link";
+};
+
+export type SanityImageAssetReference = {
+  _ref: string;
+  _type: "reference";
+  _weak?: boolean;
+  [internalGroqTypeReferenceTo]?: "sanity.imageAsset";
 };
 
 export type PartnerReference = {
@@ -149,6 +109,22 @@ export type Partner = {
   isPublic?: boolean;
   displayOrder?: number;
   internalNote?: string;
+};
+
+export type SanityImageCrop = {
+  _type: "sanity.imageCrop";
+  top?: number;
+  bottom?: number;
+  left?: number;
+  right?: number;
+};
+
+export type SanityImageHotspot = {
+  _type: "sanity.imageHotspot";
+  x?: number;
+  y?: number;
+  height?: number;
+  width?: number;
 };
 
 export type PortableText = Array<
@@ -386,16 +362,15 @@ export type Geopoint = {
 };
 
 export type AllSanitySchemaTypes =
-  | SanityImageAssetReference
-  | Testimonial
-  | SanityImageCrop
-  | SanityImageHotspot
   | Announcement
   | Cta
+  | SanityImageAssetReference
   | PartnerReference
   | LabsProject
   | Seo
   | Partner
+  | SanityImageCrop
+  | SanityImageHotspot
   | PortableText
   | Slug
   | Category
@@ -417,9 +392,10 @@ export type AllSanitySchemaTypes =
 
 // Source: ../website/app/utils/sanity-queries.ts
 // Variable: POSTS_QUERY
-// Query: *[_type == "post" && defined(publishedAt) && ($preview || (!(_id in path("drafts.**")) && publishedAt <= now()))] | order(publishedAt desc, _id asc) {  _id, title, "slug": slug.current, excerpt, publishedAt, isFeatured, readingTime,  "category": categories[0]->title,  "author": author->{name, "avatar": avatar.asset->url},  "coverImage": coverImage.asset->url, "coverImageAlt": coverImage.alt}
+// Query: *[_type == "post" && defined(publishedAt) && ($preview || (!(_id in path("drafts.**")) && publishedAt <= now()))] | order(publishedAt desc, _id asc) {  _id, _type, title, "slug": slug.current, excerpt, publishedAt, isFeatured, readingTime,  "category": categories[0]->title,  "author": author->{name, "avatar": avatar.asset->url},  "coverImage": coverImage.asset->url, "coverImageAlt": coverImage.alt}
 export type POSTS_QUERY_RESULT = Array<{
   _id: string;
+  _type: "post";
   title: string | null;
   slug: string | null;
   excerpt: string | null;
@@ -437,9 +413,10 @@ export type POSTS_QUERY_RESULT = Array<{
 
 // Source: ../website/app/utils/sanity-queries.ts
 // Variable: FEATURED_POST_QUERY
-// Query: *[_type == "post" && defined(publishedAt) && ($preview || (!(_id in path("drafts.**")) && publishedAt <= now()))] | order(isFeatured desc, publishedAt desc, _id asc)[0] {  _id, title, "slug": slug.current, excerpt, publishedAt, readingTime,  "category": categories[0]->title,  "author": author->{name, "avatar": avatar.asset->url},  "coverImage": coverImage.asset->url, "coverImageAlt": coverImage.alt}
+// Query: *[_type == "post" && defined(publishedAt) && ($preview || (!(_id in path("drafts.**")) && publishedAt <= now()))] | order(isFeatured desc, publishedAt desc, _id asc)[0] {  _id, _type, title, "slug": slug.current, excerpt, publishedAt, readingTime,  "category": categories[0]->title,  "author": author->{name, "avatar": avatar.asset->url},  "coverImage": coverImage.asset->url, "coverImageAlt": coverImage.alt}
 export type FEATURED_POST_QUERY_RESULT = {
   _id: string;
+  _type: "post";
   title: string | null;
   slug: string | null;
   excerpt: string | null;
@@ -456,9 +433,10 @@ export type FEATURED_POST_QUERY_RESULT = {
 
 // Source: ../website/app/utils/sanity-queries.ts
 // Variable: PAGINATED_POSTS_QUERY
-// Query: *[_type == "post" && defined(publishedAt) && ($preview || (!(_id in path("drafts.**")) && publishedAt <= now())) && _id != $featuredId] | order(publishedAt desc, _id asc) [$start...$end] {  _id, title, "slug": slug.current, excerpt, publishedAt, readingTime,  "category": categories[0]->title,  "author": author->{name, "avatar": avatar.asset->url},  "coverImage": coverImage.asset->url, "coverImageAlt": coverImage.alt}
+// Query: *[_type == "post" && defined(publishedAt) && ($preview || (!(_id in path("drafts.**")) && publishedAt <= now())) && _id != $featuredId] | order(publishedAt desc, _id asc) [$start...$end] {  _id, _type, title, "slug": slug.current, excerpt, publishedAt, readingTime,  "category": categories[0]->title,  "author": author->{name, "avatar": avatar.asset->url},  "coverImage": coverImage.asset->url, "coverImageAlt": coverImage.alt}
 export type PAGINATED_POSTS_QUERY_RESULT = Array<{
   _id: string;
+  _type: "post";
   title: string | null;
   slug: string | null;
   excerpt: string | null;
@@ -480,9 +458,10 @@ export type NON_FEATURED_COUNT_QUERY_RESULT = number;
 
 // Source: ../website/app/utils/sanity-queries.ts
 // Variable: POST_BY_SLUG_QUERY
-// Query: *[_type == "post" && defined(publishedAt) && slug.current == $slug && ($preview || (!(_id in path("drafts.**")) && publishedAt <= now()))] | order(_updatedAt desc)[0] {  _id, title, "slug": slug.current, excerpt, publishedAt, readingTime,  body[]{..., _type == "imageWithAlt" => {..., "url": asset->url}},  "seoTitle": coalesce(seo.title, seoTitle, title),  "seoDescription": coalesce(seo.description, seoDescription, excerpt),  "category": categories[0]->title, "categories": categories[]->title,  "author": author->{name, role, bio, "avatar": avatar.asset->url, linkedin, twitter},  "coverImage": coverImage.asset->url, "coverImageAlt": coverImage.alt}
+// Query: *[_type == "post" && defined(publishedAt) && slug.current == $slug && ($preview || (!(_id in path("drafts.**")) && publishedAt <= now()))] | order(_updatedAt desc)[0] {  _id, _type, title, "slug": slug.current, excerpt, publishedAt, readingTime,  body[]{..., _type == "imageWithAlt" => {..., "url": asset->url}},  "seoTitle": coalesce(seo.title, seoTitle, title),  "seoDescription": coalesce(seo.description, seoDescription, excerpt),  "category": categories[0]->title, "categories": categories[]->title,  "author": author->{name, role, bio, "avatar": avatar.asset->url, linkedin, twitter},  "coverImage": coverImage.asset->url, "coverImageAlt": coverImage.alt}
 export type POST_BY_SLUG_QUERY_RESULT = {
   _id: string;
+  _type: "post";
   title: string | null;
   slug: string | null;
   excerpt: string | null;
@@ -545,9 +524,10 @@ export type POST_BY_SLUG_QUERY_RESULT = {
 
 // Source: ../website/app/utils/sanity-queries.ts
 // Variable: LABS_PROJECTS_QUERY
-// Query: *[_type == "labsProject" && ($preview || !(_id in path("drafts.**")))] | order(coalesce(displayOrder, 100) asc, startDate desc, _id asc) {  _id, title, "slug": slug.current, status, "partner": coalesce(partnerRef->name, partner),  description, body[]{..., _type == "imageWithAlt" => {..., "url": asset->url}}, tags,  startDate, endDate, publicationUrl, cta,  "coverImage": coverImage.asset->url, "coverImageAlt": coverImage.alt}
+// Query: *[_type == "labsProject" && ($preview || !(_id in path("drafts.**")))] | order(coalesce(displayOrder, 100) asc, startDate desc, _id asc) {  _id, _type, title, "slug": slug.current, status, "partner": coalesce(partnerRef->name, partner),  description, body[]{..., _type == "imageWithAlt" => {..., "url": asset->url}}, tags,  startDate, endDate, publicationUrl, cta,  "coverImage": coverImage.asset->url, "coverImageAlt": coverImage.alt}
 export type LABS_PROJECTS_QUERY_RESULT = Array<{
   _id: string;
+  _type: "labsProject";
   title: string | null;
   slug: string | null;
   status: "active" | "completed" | "upcoming" | null;
@@ -603,9 +583,10 @@ export type LABS_PROJECTS_QUERY_RESULT = Array<{
 
 // Source: ../website/app/utils/sanity-queries.ts
 // Variable: ACTIVE_ANNOUNCEMENT_QUERY
-// Query: *[_type == "announcement" && isActive == true && ($preview || !(_id in path("drafts.**")))] | order(_updatedAt desc, _id asc)[0] {  _id, text, tone,  "cta": coalesce(cta, {"label": linkText, "url": link})}
+// Query: *[_type == "announcement" && isActive == true && ($preview || !(_id in path("drafts.**")))] | order(_updatedAt desc, _id asc)[0] {  _id, _type, text, tone,  "cta": coalesce(cta, {"label": linkText, "url": link})}
 export type ACTIVE_ANNOUNCEMENT_QUERY_RESULT = {
   _id: string;
+  _type: "announcement";
   text: string | null;
   tone: "info" | "success" | "warning" | null;
   cta:
@@ -616,32 +597,16 @@ export type ACTIVE_ANNOUNCEMENT_QUERY_RESULT = {
       };
 } | null;
 
-// Source: ../website/app/utils/sanity-queries.ts
-// Variable: POST_COUNT_QUERY
-// Query: count(*[_type == "post" && defined(publishedAt) && ($preview || (!(_id in path("drafts.**")) && publishedAt <= now()))])
-export type POST_COUNT_QUERY_RESULT = number;
-
-// Source: ../website/app/utils/sanity-queries.ts
-// Variable: POST_SLUGS_QUERY
-// Query: *[_type == "post" && defined(publishedAt) && ($preview || (!(_id in path("drafts.**")) && publishedAt <= now()))]{ "slug": slug.current, publishedAt, _updatedAt }
-export type POST_SLUGS_QUERY_RESULT = Array<{
-  slug: string | null;
-  publishedAt: string | null;
-  _updatedAt: string;
-}>;
-
 // Query TypeMap
 import "@sanity/client";
 declare module "@sanity/client" {
   interface SanityQueries {
-    '*[_type == "post" && defined(publishedAt) && ($preview || (!(_id in path("drafts.**")) && publishedAt <= now()))] | order(publishedAt desc, _id asc) {\n  _id, title, "slug": slug.current, excerpt, publishedAt, isFeatured, readingTime,\n  "category": categories[0]->title,\n  "author": author->{name, "avatar": avatar.asset->url},\n  "coverImage": coverImage.asset->url, "coverImageAlt": coverImage.alt\n}': POSTS_QUERY_RESULT;
-    '*[_type == "post" && defined(publishedAt) && ($preview || (!(_id in path("drafts.**")) && publishedAt <= now()))] | order(isFeatured desc, publishedAt desc, _id asc)[0] {\n  _id, title, "slug": slug.current, excerpt, publishedAt, readingTime,\n  "category": categories[0]->title,\n  "author": author->{name, "avatar": avatar.asset->url},\n  "coverImage": coverImage.asset->url, "coverImageAlt": coverImage.alt\n}': FEATURED_POST_QUERY_RESULT;
-    '*[_type == "post" && defined(publishedAt) && ($preview || (!(_id in path("drafts.**")) && publishedAt <= now())) && _id != $featuredId] | order(publishedAt desc, _id asc) [$start...$end] {\n  _id, title, "slug": slug.current, excerpt, publishedAt, readingTime,\n  "category": categories[0]->title,\n  "author": author->{name, "avatar": avatar.asset->url},\n  "coverImage": coverImage.asset->url, "coverImageAlt": coverImage.alt\n}': PAGINATED_POSTS_QUERY_RESULT;
+    '*[_type == "post" && defined(publishedAt) && ($preview || (!(_id in path("drafts.**")) && publishedAt <= now()))] | order(publishedAt desc, _id asc) {\n  _id, _type, title, "slug": slug.current, excerpt, publishedAt, isFeatured, readingTime,\n  "category": categories[0]->title,\n  "author": author->{name, "avatar": avatar.asset->url},\n  "coverImage": coverImage.asset->url, "coverImageAlt": coverImage.alt\n}': POSTS_QUERY_RESULT;
+    '*[_type == "post" && defined(publishedAt) && ($preview || (!(_id in path("drafts.**")) && publishedAt <= now()))] | order(isFeatured desc, publishedAt desc, _id asc)[0] {\n  _id, _type, title, "slug": slug.current, excerpt, publishedAt, readingTime,\n  "category": categories[0]->title,\n  "author": author->{name, "avatar": avatar.asset->url},\n  "coverImage": coverImage.asset->url, "coverImageAlt": coverImage.alt\n}': FEATURED_POST_QUERY_RESULT;
+    '*[_type == "post" && defined(publishedAt) && ($preview || (!(_id in path("drafts.**")) && publishedAt <= now())) && _id != $featuredId] | order(publishedAt desc, _id asc) [$start...$end] {\n  _id, _type, title, "slug": slug.current, excerpt, publishedAt, readingTime,\n  "category": categories[0]->title,\n  "author": author->{name, "avatar": avatar.asset->url},\n  "coverImage": coverImage.asset->url, "coverImageAlt": coverImage.alt\n}': PAGINATED_POSTS_QUERY_RESULT;
     'count(*[_type == "post" && defined(publishedAt) && ($preview || (!(_id in path("drafts.**")) && publishedAt <= now())) && _id != $featuredId])': NON_FEATURED_COUNT_QUERY_RESULT;
-    '*[_type == "post" && defined(publishedAt) && slug.current == $slug && ($preview || (!(_id in path("drafts.**")) && publishedAt <= now()))] | order(_updatedAt desc)[0] {\n  _id, title, "slug": slug.current, excerpt, publishedAt, readingTime,\n  body[]{..., _type == "imageWithAlt" => {..., "url": asset->url}},\n  "seoTitle": coalesce(seo.title, seoTitle, title),\n  "seoDescription": coalesce(seo.description, seoDescription, excerpt),\n  "category": categories[0]->title, "categories": categories[]->title,\n  "author": author->{name, role, bio, "avatar": avatar.asset->url, linkedin, twitter},\n  "coverImage": coverImage.asset->url, "coverImageAlt": coverImage.alt\n}': POST_BY_SLUG_QUERY_RESULT;
-    '*[_type == "labsProject" && ($preview || !(_id in path("drafts.**")))] | order(coalesce(displayOrder, 100) asc, startDate desc, _id asc) {\n  _id, title, "slug": slug.current, status, "partner": coalesce(partnerRef->name, partner),\n  description, body[]{..., _type == "imageWithAlt" => {..., "url": asset->url}}, tags,\n  startDate, endDate, publicationUrl, cta,\n  "coverImage": coverImage.asset->url, "coverImageAlt": coverImage.alt\n}': LABS_PROJECTS_QUERY_RESULT;
-    '*[_type == "announcement" && isActive == true && ($preview || !(_id in path("drafts.**")))] | order(_updatedAt desc, _id asc)[0] {\n  _id, text, tone,\n  "cta": coalesce(cta, {"label": linkText, "url": link})\n}': ACTIVE_ANNOUNCEMENT_QUERY_RESULT;
-    'count(*[_type == "post" && defined(publishedAt) && ($preview || (!(_id in path("drafts.**")) && publishedAt <= now()))])': POST_COUNT_QUERY_RESULT;
-    '*[_type == "post" && defined(publishedAt) && ($preview || (!(_id in path("drafts.**")) && publishedAt <= now()))]{ "slug": slug.current, publishedAt, _updatedAt }': POST_SLUGS_QUERY_RESULT;
+    '*[_type == "post" && defined(publishedAt) && slug.current == $slug && ($preview || (!(_id in path("drafts.**")) && publishedAt <= now()))] | order(_updatedAt desc)[0] {\n  _id, _type, title, "slug": slug.current, excerpt, publishedAt, readingTime,\n  body[]{..., _type == "imageWithAlt" => {..., "url": asset->url}},\n  "seoTitle": coalesce(seo.title, seoTitle, title),\n  "seoDescription": coalesce(seo.description, seoDescription, excerpt),\n  "category": categories[0]->title, "categories": categories[]->title,\n  "author": author->{name, role, bio, "avatar": avatar.asset->url, linkedin, twitter},\n  "coverImage": coverImage.asset->url, "coverImageAlt": coverImage.alt\n}': POST_BY_SLUG_QUERY_RESULT;
+    '*[_type == "labsProject" && ($preview || !(_id in path("drafts.**")))] | order(coalesce(displayOrder, 100) asc, startDate desc, _id asc) {\n  _id, _type, title, "slug": slug.current, status, "partner": coalesce(partnerRef->name, partner),\n  description, body[]{..., _type == "imageWithAlt" => {..., "url": asset->url}}, tags,\n  startDate, endDate, publicationUrl, cta,\n  "coverImage": coverImage.asset->url, "coverImageAlt": coverImage.alt\n}': LABS_PROJECTS_QUERY_RESULT;
+    '*[_type == "announcement" && isActive == true && ($preview || !(_id in path("drafts.**")))] | order(_updatedAt desc, _id asc)[0] {\n  _id, _type, text, tone,\n  "cta": coalesce(cta, {"label": linkText, "url": link})\n}': ACTIVE_ANNOUNCEMENT_QUERY_RESULT;
   }
 }

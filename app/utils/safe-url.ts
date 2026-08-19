@@ -8,10 +8,3 @@ export function safeExternalUrl(value?: string | null) {
     return undefined
   }
 }
-
-/** Constrain preview redirects to a path on the current website origin. */
-export function safeLocalPath(value?: string | null) {
-  if (!value?.startsWith('/') || value.startsWith('//') || value.includes('\\')) return '/'
-  const url = new URL(value, 'https://deflowlabs.io')
-  return `${url.pathname}${url.search}${url.hash}`
-}

@@ -4,6 +4,7 @@
       v-if="announcement && !isDismissed"
       class="announcement"
       :class="`announcement--${announcement.tone || 'info'}`"
+      :data-sanity="encodeDataAttribute('text')"
       role="banner"
       aria-label="Announcement"
     >
@@ -47,13 +48,17 @@ import { ACTIVE_ANNOUNCEMENT_QUERY } from '~/utils/sanity-queries'
 import type { ACTIVE_ANNOUNCEMENT_QUERY_RESULT } from '~/types/sanity.generated'
 import { safeExternalUrl } from '~/utils/safe-url'
 
-const { sanityFetch } = useSanity()
-
 const emit = defineEmits<{
   'visibility-change': [visible: boolean]
 }>()
 
-const announcement = ref<ACTIVE_ANNOUNCEMENT_QUERY_RESULT>(null)
+const visualEditing = useSanityVisualEditingState()
+const previewParams = reactive({ preview: visualEditing?.enabled ?? false })
+const {
+  data: announcement,
+  encodeDataAttribute,
+} = await useSanityQuery<ACTIVE_ANNOUNCEMENT_QUERY_RESULT>(ACTIVE_ANNOUNCEMENT_QUERY, previewParams)
+
 const isDismissed = ref(false)
 const announcementUrl = computed(() => safeExternalUrl(announcement.value?.cta?.url))
 
@@ -61,18 +66,16 @@ const announcementUrl = computed(() => safeExternalUrl(announcement.value?.cta?.
 const isVisible = computed(() => !!announcement.value && !isDismissed.value)
 watch(isVisible, (val) => emit('visibility-change', val), { immediate: true })
 
-onMounted(async () => {
-  try {
-    const data = await sanityFetch<ACTIVE_ANNOUNCEMENT_QUERY_RESULT>(ACTIVE_ANNOUNCEMENT_QUERY)
-    if (data) {
-      announcement.value = data
-      const key = `deflow-announcement-dismissed-${data._id}`
-      isDismissed.value = sessionStorage.getItem(key) === 'true'
-    }
-  } catch {
-    // Silently fail — banner is non-critical
-  }
-})
+watch(
+  () => visualEditing?.enabled,
+  enabled => { previewParams.preview = enabled ?? false },
+)
+
+watch(announcement, (data) => {
+  if (!import.meta.client || !data) return
+  const key = `deflow-announcement-dismissed-${data._id}`
+  isDismissed.value = sessionStorage.getItem(key) === 'true'
+}, { immediate: true })
 
 /**
  * Dismiss the banner for the current session.

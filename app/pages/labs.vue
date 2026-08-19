@@ -57,7 +57,14 @@
         </div>
 
         <div class="labs-projects__grid">
-          <div v-for="project in projects" :key="project.slug || project.title || 'project'" class="labs-project glass-card">
+          <div
+            v-for="(project, projectIndex) in projects"
+            :key="project.slug || project.title || 'project'"
+            class="labs-project glass-card"
+            :data-sanity="project._id && !project._id.startsWith('placeholder-')
+              ? encodeDataAttribute(`[${projectIndex}].title`)
+              : undefined"
+          >
             <div class="labs-project__header">
               <span
                 class="badge"
@@ -134,13 +141,21 @@ useHead({
 
 useCanonical()
 
-const { sanityFetch } = useSanity()
-const { data: sanityProjects } = await useAsyncData('labs-projects', () =>
-  sanityFetch<LABS_PROJECTS_QUERY_RESULT>(LABS_PROJECTS_QUERY),
+const visualEditing = useSanityVisualEditingState()
+const previewParams = reactive({ preview: visualEditing?.enabled ?? false })
+const {
+  data: sanityProjects,
+  encodeDataAttribute,
+} = await useSanityQuery<LABS_PROJECTS_QUERY_RESULT>(LABS_PROJECTS_QUERY, previewParams)
+
+watch(
+  () => visualEditing?.enabled,
+  enabled => { previewParams.preview = enabled ?? false },
 )
 
 const placeholderProject = [
   {
+    _id: 'placeholder-research-project-1',
     slug: 'research-project-1',
     title: 'Research Project #1',
     status: 'upcoming' as const,
@@ -152,7 +167,7 @@ const placeholderProject = [
   },
 ]
 
-type LabsCard = Pick<LABS_PROJECTS_QUERY_RESULT[number], 'slug' | 'title' | 'status' | 'partner' | 'description' | 'tags' | 'publicationUrl' | 'cta'>
+type LabsCard = Pick<LABS_PROJECTS_QUERY_RESULT[number], '_id' | 'slug' | 'title' | 'status' | 'partner' | 'description' | 'tags' | 'publicationUrl' | 'cta'>
 
 const projects = computed<LabsCard[]>(() => {
   const p = sanityProjects.value

@@ -42,7 +42,11 @@
     <!-- Featured Post -->
     <section v-if="featuredPost && !searchQuery && activeCategory === 'All'" class="blog-featured section" style="padding-top: 0">
       <div class="container">
-        <NuxtLink :to="`/blog/${featuredPost.slug}`" class="blog-featured__card glass-card">
+        <NuxtLink
+          :to="`/blog/${featuredPost.slug}`"
+          class="blog-featured__card glass-card"
+          :data-sanity="featuredDataAttribute('title')"
+        >
           <div
             class="blog-featured__image"
             :style="{
@@ -159,25 +163,18 @@ useCanonical()
 const categories = ['All', 'Product', 'Research', 'Engineering', 'Ecosystem', 'Company']
 const activeCategory = ref('All')
 const searchQuery = ref('')
-const loading = ref(false)
 const PAGE_SIZE = 6
-
-// Fetch from Sanity
-const { sanityFetch } = useSanity()
 
 // Featured post
 type SanityPost = PAGINATED_POSTS_QUERY_RESULT[number]
-type BlogCard = Omit<SanityPost, '_id' | 'coverImage' | 'coverImageAlt'> & {
-  _id?: string
+type BlogCard = Omit<SanityPost, '_id' | '_type' | 'coverImage' | 'coverImageAlt'> & {
+  _id: string
   coverImage?: string | null
   coverImageAlt?: string | null
   color?: string
 }
 
-const featuredPost = ref<FEATURED_POST_QUERY_RESULT>(null)
 const allPosts = ref<BlogCard[]>([])
-const totalNonFeatured = ref(0)
-const page = ref(0)
 
 // Placeholder articles (shown when Sanity has no content yet)
 const placeholderArticles: BlogCard[] = [
@@ -222,27 +219,72 @@ const placeholderArticles: BlogCard[] = [
   },
 ]
 
-// Initial fetch
-const { data: initialData } = await useAsyncData('blog-init', async () => {
-  try {
-    const [featured, posts, count] = await Promise.all([
-      sanityFetch<FEATURED_POST_QUERY_RESULT>(FEATURED_POST_QUERY),
-      sanityFetch<PAGINATED_POSTS_QUERY_RESULT>(PAGINATED_POSTS_QUERY, { start: 0, end: PAGE_SIZE, featuredId: '' }),
-      sanityFetch<NON_FEATURED_COUNT_QUERY_RESULT>(NON_FEATURED_COUNT_QUERY, { featuredId: '' }),
-    ])
-    return { featured, posts, count }
-  } catch {
-    return { featured: null, posts: [], count: 0 }
-  }
+const visualEditing = useSanityVisualEditingState()
+const featuredParams = reactive({ preview: visualEditing?.enabled ?? false })
+const {
+  data: featuredPost,
+  encodeDataAttribute: featuredDataAttribute,
+} = await useSanityQuery<FEATURED_POST_QUERY_RESULT>(FEATURED_POST_QUERY, featuredParams)
+
+const pageParams = reactive({
+  start: 0,
+  end: PAGE_SIZE,
+  featuredId: featuredPost.value?._id || '',
+  preview: visualEditing?.enabled ?? false,
+})
+const countParams = reactive({
+  featuredId: featuredPost.value?._id || '',
+  preview: visualEditing?.enabled ?? false,
 })
 
-if (initialData.value) {
-  featuredPost.value = initialData.value.featured
-  const posts = initialData.value.posts
-  allPosts.value = posts?.length ? posts : []
-  totalNonFeatured.value = initialData.value.count || 0
-  page.value = 1
-}
+const [pageQuery, countQuery] = await Promise.all([
+  useSanityQuery<PAGINATED_POSTS_QUERY_RESULT>(PAGINATED_POSTS_QUERY, pageParams, { key: 'blog-page' }),
+  useSanityQuery<NON_FEATURED_COUNT_QUERY_RESULT>(NON_FEATURED_COUNT_QUERY, countParams, { key: 'blog-count' }),
+])
+
+const {
+  data: currentPage,
+  status: pageStatus,
+} = pageQuery
+const { data: totalCount } = countQuery
+const loadingMore = ref(false)
+const loading = computed(() => loadingMore.value || pageStatus.value === 'pending')
+const totalNonFeatured = computed(() => totalCount.value || 0)
+
+watch(currentPage, (posts) => {
+  if (!posts) return
+  if (pageParams.start === 0) {
+    allPosts.value = [...posts]
+    return
+  }
+
+  const merged = new Map(allPosts.value.map(post => [post._id, post]))
+  for (const post of posts) merged.set(post._id, post)
+  allPosts.value = [...merged.values()]
+}, { immediate: true })
+
+watch(pageStatus, status => {
+  if (status !== 'pending') loadingMore.value = false
+})
+
+watch(() => visualEditing?.enabled, (enabled) => {
+  const preview = enabled ?? false
+  featuredParams.preview = preview
+  pageParams.preview = preview
+  countParams.preview = preview
+  pageParams.start = 0
+  pageParams.end = PAGE_SIZE
+  allPosts.value = []
+})
+
+watch(() => featuredPost.value?._id, (featuredId) => {
+  const id = featuredId || ''
+  pageParams.featuredId = id
+  countParams.featuredId = id
+  pageParams.start = 0
+  pageParams.end = PAGE_SIZE
+  allPosts.value = []
+})
 
 const usePlaceholders = computed(() => !featuredPost.value && allPosts.value.length === 0)
 
@@ -278,24 +320,11 @@ const hasMore = computed(() => {
 /**
  * Load next page of articles from Sanity via GROQ offset pagination.
  */
-async function loadMore() {
+function loadMore() {
   if (loading.value || !hasMore.value) return
-  loading.value = true
-  try {
-    const start = page.value * PAGE_SIZE
-    const end = start + PAGE_SIZE
-    const morePosts = await sanityFetch<PAGINATED_POSTS_QUERY_RESULT>(PAGINATED_POSTS_QUERY, {
-      start,
-      end,
-      featuredId: featuredPost.value?._id || '',
-    })
-    if (morePosts?.length) {
-      allPosts.value = [...allPosts.value, ...morePosts]
-      page.value++
-    }
-  } finally {
-    loading.value = false
-  }
+  loadingMore.value = true
+  pageParams.start += PAGE_SIZE
+  pageParams.end += PAGE_SIZE
 }
 
 /**

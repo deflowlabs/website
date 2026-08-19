@@ -5,7 +5,18 @@
  */
 import tailwindcss from '@tailwindcss/vite'
 
-const studioOrigin = process.env.NUXT_SANITY_STUDIO_ORIGIN || 'http://localhost:3333'
+const sanityProjectId = process.env.NUXT_SANITY_PROJECT_ID || 'i34vbeac'
+const sanityDataset = process.env.NUXT_SANITY_DATASET || 'production'
+const sanityApiVersion = process.env.NUXT_SANITY_API_VERSION || '2026-08-17'
+const sanityReadToken = process.env.SANITY_API_READ_TOKEN || ''
+const configuredStudioOrigin = process.env.NUXT_SANITY_STUDIO_ORIGIN || 'http://localhost:3333'
+const studioUrl = new URL(configuredStudioOrigin)
+
+if (!['http:', 'https:'].includes(studioUrl.protocol)) {
+  throw new Error('NUXT_SANITY_STUDIO_ORIGIN must use http or https')
+}
+
+const studioOrigin = studioUrl.origin
 
 /**
  * A Vercel production deployment without one of these values would build but
@@ -20,7 +31,6 @@ if (process.env.VERCEL_ENV === 'production') {
     'NUXT_SANITY_API_VERSION',
     'NUXT_SANITY_STUDIO_ORIGIN',
     'SANITY_API_READ_TOKEN',
-    'SANITY_PREVIEW_COOKIE_SECRET',
     'NUXT_PUBLIC_TURNSTILE_SITE_KEY',
     'TURNSTILE_SECRET_KEY',
     'RESEND_API_KEY',
@@ -90,8 +100,32 @@ export default defineNuxtConfig({
     '@nuxt/icon',
     '@nuxt/image',
     '@nuxt/fonts',
+    '@nuxtjs/sanity',
     '@nuxtjs/sitemap',
   ],
+
+  // Published reads use Sanity's CDN. A server-only Viewer token activates
+  // authenticated draft perspective and click-to-edit overlays in Presentation.
+  sanity: {
+    projectId: sanityProjectId,
+    dataset: sanityDataset,
+    apiVersion: sanityApiVersion,
+    perspective: 'published',
+    useCdn: true,
+    visualEditing: sanityReadToken
+      ? {
+          mode: 'live-visual-editing',
+          token: sanityReadToken,
+          studioUrl: studioOrigin,
+          stega: true,
+          keepStegaOnCopy: false,
+          previewMode: {
+            enable: '/preview/enable',
+            disable: '/preview/disable',
+          },
+        }
+      : undefined,
+  },
 
   // Site URL — required by sitemap module during prerender
   site: {
@@ -146,15 +180,13 @@ export default defineNuxtConfig({
     contactEmail: process.env.CONTACT_EMAIL || 'contact@deflowlabs.io',
     piiSaltSecret: process.env.PII_SALT_SECRET || '',
     postgresUrl: process.env.POSTGRES_URL || '',
-    sanityApiReadToken: process.env.SANITY_API_READ_TOKEN || '',
-    sanityPreviewCookieSecret: process.env.SANITY_PREVIEW_COOKIE_SECRET || '',
     public: {
       // Client-accessible
       turnstileSiteKey: process.env.NUXT_PUBLIC_TURNSTILE_SITE_KEY || '',
       siteUrl: process.env.NUXT_PUBLIC_SITE_URL || 'https://deflowlabs.io',
-      sanityProjectId: process.env.NUXT_SANITY_PROJECT_ID || '',
-      sanityDataset: process.env.NUXT_SANITY_DATASET || 'production',
-      sanityApiVersion: process.env.NUXT_SANITY_API_VERSION || '2026-08-17',
+      sanityProjectId,
+      sanityDataset,
+      sanityApiVersion,
     },
   },
 

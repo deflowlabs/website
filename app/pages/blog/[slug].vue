@@ -1,5 +1,8 @@
 <template>
-  <div class="article-page">
+  <div
+    class="article-page"
+    :data-sanity="encodeDataAttribute('title')"
+  >
     <section class="article-hero section">
       <div class="container">
         <div class="article-hero__inner">
@@ -50,9 +53,18 @@ import type { POST_BY_SLUG_QUERY_RESULT } from '~/types/sanity.generated'
 const route = useRoute()
 const slug = route.params.slug as string
 
-const { sanityFetch } = useSanity()
-const { data: sanityArticle } = await useAsyncData(`post-${slug}`, () =>
-  sanityFetch<POST_BY_SLUG_QUERY_RESULT>(POST_BY_SLUG_QUERY, { slug }),
+const visualEditing = useSanityVisualEditingState()
+const queryParams = reactive({ slug, preview: visualEditing?.enabled ?? false })
+const {
+  data: sanityArticle,
+  encodeDataAttribute,
+} = await useSanityQuery<POST_BY_SLUG_QUERY_RESULT>(POST_BY_SLUG_QUERY, queryParams, {
+  key: `post-${slug}`,
+})
+
+watch(
+  () => visualEditing?.enabled,
+  enabled => { queryParams.preview = enabled ?? false },
 )
 
 // Return a proper 404 for unknown slugs instead of fabricating content (DFL-015)

@@ -9,17 +9,19 @@ The public [deflowlabs.io](https://deflowlabs.io) application, built with Nuxt 4
 
 - Public marketing and legal pages.
 - Blog, announcement, Partner and Labs rendering from Sanity.
-- Accessible Portable Text rendering and authenticated draft preview.
+- Accessible Portable Text rendering and authenticated live visual editing.
 - Waitlist and contact APIs.
 - SEO, RSS, sitemap, ISR and response security headers.
 
 The sibling `/studio` owns Sanity schemas/editor UX. `/docs` is the separate static Nuxt Content application.
 
 ```text
-Sanity Studio ──► Sanity dataset ──► allowlisted website query endpoint
-                                             │
-Browser ──► Nuxt SSR/ISR ────────────────────┼─► rendered marketing content
-   │                                         │
+Sanity Studio ──► Sanity dataset ──► published Sanity CDN queries
+       │                    │
+       └─ Presentation ─────┴─► authenticated Visual Editing proxy
+                                      │
+Browser ──► Nuxt SSR/ISR ─────────────┼─► rendered marketing content
+   │                                  │
    ├─ waitlist ─► Turnstile ─► HMAC hash ─► Postgres
    └─ contact ──► Turnstile ───────────────► Resend
 ```
@@ -30,7 +32,7 @@ Browser ──► Nuxt SSR/ISR ────────────────�
 |---|---|
 | Framework | Nuxt 4, Vue 3, SSR/ISR |
 | Styling | Tailwind CSS 4 |
-| CMS | Sanity Studio 6.9 and `@sanity/client` 7 |
+| CMS | Sanity Studio 6.9, `@nuxtjs/sanity` 2.5 and `@sanity/client` 7 |
 | Rich content | `@portabletext/vue` with safe custom components |
 | Storage | Neon/Vercel Postgres for waitlist hashes |
 | Bot protection | Cloudflare Turnstile |
@@ -74,8 +76,7 @@ Open `http://localhost:3000`. Published Sanity pages need the project, dataset a
 | `NUXT_SANITY_DATASET` | `production` or isolated preview dataset | Public configuration |
 | `NUXT_SANITY_API_VERSION` | Pinned contract date, `2026-08-17` | Public configuration |
 | `NUXT_SANITY_STUDIO_ORIGIN` | Exact Studio origin allowed to frame preview | Public configuration |
-| `SANITY_API_READ_TOKEN` | Least-privilege Viewer token for server draft reads | **Server secret** |
-| `SANITY_PREVIEW_COOKIE_SECRET` | Independent random value, at least 32 characters | **Server secret** |
+| `SANITY_API_READ_TOKEN` | Least-privilege Viewer token for server-only draft reads and preview-secret validation | **Server secret** |
 
 ### Forms and application
 
@@ -89,7 +90,7 @@ Open `http://localhost:3000`. Published Sanity pages need the project, dataset a
 | `PII_SALT_SECRET` | Stable HMAC key for waitlist email hashes | **Server secret** |
 | `POSTGRES_URL` | Waitlist database connection | **Server secret** |
 
-Never expose a server secret through `NUXT_PUBLIC_*`. Generate preview-cookie and PII keys independently:
+Never expose a server secret through `NUXT_PUBLIC_*`. Generate the PII key independently:
 
 ```powershell
 [Convert]::ToHexString([Security.Cryptography.RandomNumberGenerator]::GetBytes(32)).ToLower()
@@ -99,21 +100,19 @@ Changing `PII_SALT_SECRET` changes the same email’s stored hash and breaks ded
 
 ## CMS query and preview architecture
 
-Public mode:
+Public mode uses checked-in GROQ through `useSanityQuery`, the published perspective and Sanity's CDN:
 
 ```text
-Page/component → useSanity → POST /api/sanity/query
-→ known query identifier → checked-in GROQ → published perspective
+Page/component → useSanityQuery → checked-in GROQ
+→ published perspective → Sanity CDN
 ```
 
-Preview mode uses the same server boundary with authenticated preview state and draft perspective. The browser cannot submit arbitrary GROQ and never receives the read token.
+Presentation validates Sanity's signed preview URL, sets a random `HttpOnly`, `SameSite=None`, secure production cookie and uses the module's protected server proxy for draft queries. The browser never receives the Viewer token. Source maps and stega metadata enable click-to-edit overlays only inside the authenticated preview session and are stripped when copied.
 
 | File | Responsibility |
 |---|---|
 | `app/utils/sanity-queries.ts` | GROQ projections, filters and deterministic ordering |
-| `app/composables/useSanity.ts` | Component-facing query interface |
-| `server/api/sanity/query.post.ts` | Query allowlist and server client |
-| `server/utils/sanity-preview.ts` | Signed preview-cookie checks |
+| `nuxt.config.ts` | Sanity client, secure preview proxy, Visual Editing and framing policy |
 | `app/components/PortableContent.vue` | Accessible rich-content rendering |
 | `app/types/sanity.generated.ts` | Generated schema/query types; do not edit |
 
@@ -121,12 +120,12 @@ Public queries exclude drafts and future publication dates, deterministically se
 
 ## Running website and Studio together
 
-1. Set the website’s Sanity values, read token, 32+ character cookie secret and `NUXT_SANITY_STUDIO_ORIGIN=http://localhost:3333`.
+1. Set the website’s Sanity values, Viewer token and `NUXT_SANITY_STUDIO_ORIGIN=http://localhost:3333`.
 2. Start website on port 3000.
 3. Set Studio `SANITY_STUDIO_PREVIEW_URL=http://localhost:3000` and start it on 3333.
 4. Add both exact origins to Sanity CORS; enable credentials only where required.
 5. Open Presentation from Studio and confirm draft content is limited to that authenticated session.
-6. Visit `/api/preview/disable` when finished.
+6. Use Presentation's preview control or visit `/preview/disable` when finished.
 
 Restart website after changing Studio origin because CSP framing is built from runtime configuration.
 
@@ -154,9 +153,9 @@ Coordinate schema and consumer changes in this order:
 | `POST` | `/api/waitlist` | Verify Turnstile, hash email and store deduplicated waitlist entry |
 | `GET` | `/api/waitlist/count` | Return aggregate waitlist count |
 | `POST` | `/api/contact` | Verify Turnstile and deliver contact email |
-| `GET` | `/api/preview/enable` | Validate Presentation secret and enable signed draft preview |
-| `GET` | `/api/preview/disable` | Clear preview state |
-| `POST` | `/api/sanity/query` | Execute only an allowlisted CMS query |
+| `GET` | `/preview/enable` | Module-owned signed-secret validation and secure preview activation |
+| `GET` | `/preview/disable` | Module-owned preview-state removal |
+| `POST` | `/_sanity/visual-editing/fetch` | Protected server-only draft query forwarding for Presentation |
 
 New endpoints must validate input, keep secrets in runtime config, rate-limit plausible abuse, return minimal errors, avoid PII logs and include tests. Update this table.
 
@@ -191,7 +190,7 @@ The website is SSR/ISR, not the static `/docs` build. `vercel.json` is authorita
 | Install | `npm ci` |
 | Build | `npm run build` |
 | Output | Leave empty; use Nuxt/Vercel Build Output API |
-| Production Branch | `master` |
+| Production Branch | `main` |
 | Domain | `deflowlabs.io` plus canonical `www` redirect if used |
 
 ### Environment scoping
@@ -217,7 +216,7 @@ Before promotion, run the full verification commands, deploy Preview, complete w
 
 - Keep Sanity tokens, form secrets, DB URLs and HMAC salts server-only.
 - Preserve exact CORS/Studio origins, CSP framing, MIME-sniffing, referrer and permissions headers.
-- Preserve query allowlisting and safe external-URL validation.
+- Preserve published-perspective filters, preview-proxy authorisation and safe external-URL validation.
 - Never log raw waitlist/contact emails or secrets.
 - Use separate preview resources and rotate credentials after access changes.
 - Monitor server functions, Sanity queries, Resend and database availability.
@@ -225,8 +224,8 @@ Before promotion, run the full verification commands, deploy Preview, complete w
 
 ## Troubleshooting
 
-- **No CMS content:** verify project/dataset/API date, `/api/sanity/query`, publication date and query filters.
-- **Preview shows published only:** verify server token, cookie-secret length, exact Studio origin/CORS/CSP; clear preview and restart both apps.
+- **No CMS content:** verify project/dataset/API date, publication date, browser network response and query filters.
+- **Preview shows published only:** verify the Viewer token, exact Studio origin, Sanity CORS and website CSP; disable preview, restart both apps and retry.
 - **Generated type is stale:** extract/typegen from sibling `/studio`; ensure queries remain under website `app` or `server`.
 - **Host-only build failure:** compare Node and exact environment names; check public/server prefixes and Nuxt Vercel preset.
 - **Fonts perform build-time network work:** migrate approved Geist assets to a local source and visually verify before removing provider configuration.
