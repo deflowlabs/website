@@ -1,7 +1,6 @@
 <template>
-  <figure v-if="hasImage" class="sanity-image" :style="{ aspectRatio: String(aspectRatio) }">
+  <figure v-if="hasImage && !renderFailed" class="sanity-image" :style="{ aspectRatio: String(aspectRatio) }">
     <picture>
-      <source type="image/avif" :srcset="avifSrcset" :sizes="sizes">
       <source type="image/webp" :srcset="webpSrcset" :sizes="sizes">
       <img
         :src="fallbackUrl"
@@ -13,11 +12,18 @@
         :loading="priority ? 'eager' : 'lazy'"
         :fetchpriority="priority ? 'high' : 'auto'"
         decoding="async"
+        @error="renderFailed = true"
       >
     </picture>
     <figcaption v-if="caption">{{ caption }}</figcaption>
   </figure>
-  <div v-else class="sanity-image sanity-image--fallback" :style="{ aspectRatio: String(aspectRatio) }" aria-hidden="true" />
+  <div
+    v-else
+    class="sanity-image sanity-image--fallback"
+    :style="{ aspectRatio: String(aspectRatio) }"
+    role="img"
+    :aria-label="alt || 'Image unavailable'"
+  />
 </template>
 
 <script setup lang="ts">
@@ -53,11 +59,14 @@ const builder = imageUrlBuilder({
 })
 const widths = [480, 768, 1024, 1280, 1600]
 const cleanImage = computed(() => stegaClean(props.image) as SanityImageValue | null | undefined)
-const hasImage = computed(() => Boolean(cleanImage.value?.asset?._id || cleanImage.value?.asset?._ref))
+const hasImage = computed(() => Boolean(cleanImage.value?.asset?._id || cleanImage.value?.asset?._ref || cleanImage.value?.asset?.url))
+const renderFailed = ref(false)
 const displayWidth = 1600
 const displayHeight = computed(() => Math.round(displayWidth / props.aspectRatio))
 
-function imageUrl(width: number, format: 'avif' | 'webp' | 'jpg') {
+watch(cleanImage, () => { renderFailed.value = false })
+
+function imageUrl(width: number, format: 'webp' | 'jpg') {
   if (!cleanImage.value) return ''
   const baseUrl = builder
     .image(cleanImage.value)
@@ -71,11 +80,10 @@ function imageUrl(width: number, format: 'avif' | 'webp' | 'jpg') {
   return url.toString()
 }
 
-function srcset(format: 'avif' | 'webp' | 'jpg') {
+function srcset(format: 'webp' | 'jpg') {
   return widths.map(width => `${imageUrl(width, format)} ${width}w`).join(', ')
 }
 
-const avifSrcset = computed(() => srcset('avif'))
 const webpSrcset = computed(() => srcset('webp'))
 const fallbackSrcset = computed(() => srcset('jpg'))
 const fallbackUrl = computed(() => imageUrl(1280, 'jpg'))
