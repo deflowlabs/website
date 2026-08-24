@@ -24,8 +24,6 @@ export function baseRevalidationPaths(
     addSlugs('/blog')
   } else if (type === 'labsProject') {
     paths.add('/labs')
-    paths.add('/sitemap.xml')
-    addSlugs('/labs')
   } else if (type === 'author' || type === 'category') {
     paths.add('/blog')
     paths.add('/rss.xml')
@@ -33,7 +31,6 @@ export function baseRevalidationPaths(
     if (type === 'author') addSlugs('/blog/author')
   } else if (type === 'partner') {
     paths.add('/labs')
-    paths.add('/sitemap.xml')
   }
 
   return paths

@@ -66,10 +66,41 @@ test('blog filters and pagination have stable route contracts', async () => {
   assert.match(blog, /page: String\(currentPage \+ 1\)/)
 })
 
-test('Labs index and details are sibling routes', () => {
+test('Blog presentation uses the approved headings and omits card authors', async () => {
+  const [blog, card] = await Promise.all([
+    readFile(new URL('../app/pages/blog/index.vue', import.meta.url), 'utf8'),
+    readFile(new URL('../app/components/BlogPostCard.vue', import.meta.url), 'utf8'),
+  ])
+  assert.doesNotMatch(blog, /Latest announcement|Featured insight/)
+  assert.doesNotMatch(blog, />Latest</)
+  assert.match(blog, /<h2>Featured<\/h2>/)
+  assert.match(blog, /<h2>\{\{ hasFilters \? 'Articles' : 'Most recent' \}\}<\/h2>/)
+  assert.doesNotMatch(card, /post\.author/)
+})
+
+test('Sanity images use supported CDN formats and expose an accessible fallback', async () => {
+  const image = await readFile(new URL('../app/components/SanityImage.vue', import.meta.url), 'utf8')
+  assert.doesNotMatch(image, /avif/i)
+  assert.match(image, /image\/webp/)
+  assert.match(image, /'webp' \| 'jpg'/)
+  assert.match(image, /@error="renderFailed = true"/)
+  assert.match(image, /aria-label="alt \|\| 'Image unavailable'"/)
+})
+
+test('Labs projects are presented only on the index route', () => {
   assert.equal(existsSync(new URL('../app/pages/labs.vue', import.meta.url)), false)
   assert.equal(existsSync(new URL('../app/pages/labs/index.vue', import.meta.url)), true)
-  assert.equal(existsSync(new URL('../app/pages/labs/[slug].vue', import.meta.url)), true)
+  assert.equal(existsSync(new URL('../app/pages/labs/[slug].vue', import.meta.url)), false)
+})
+
+test('Labs cards are non-interactive and detail-only queries are absent', async () => {
+  const [labs, queries] = await Promise.all([
+    readFile(new URL('../app/pages/labs/index.vue', import.meta.url), 'utf8'),
+    readFile(new URL('../app/utils/sanity-queries.ts', import.meta.url), 'utf8'),
+  ])
+  assert.match(labs, /<article/)
+  assert.doesNotMatch(labs, /Explore project|`\/labs\/\$\{/)
+  assert.doesNotMatch(queries, /LABS_PROJECT_BY_SLUG_QUERY/)
 })
 
 test('all public CMS consumers require authenticated preview state for drafts', () => {
@@ -104,7 +135,7 @@ test('SEO and publish freshness are runtime-aware', async () => {
   ])
   assert.match(sitemap, /seo\.noIndex/)
   assert.match(sitemap, /\/blog\/author\//)
-  assert.match(sitemap, /\/labs\//)
+  assert.doesNotMatch(sitemap, /\/labs\//)
   assert.match(webhook, /isValidSignature/)
   assert.match(webhook, /sanity-project-id/)
   assert.match(webhook, /x-prerender-revalidate/)

@@ -16,7 +16,6 @@ const postCardProjection = `{
   isFeatured, readingTime,
   "category": categories[0]->{_id, title, "slug": slug.current},
   "categories": categories[]->{_id, title, "slug": slug.current},
-  "author": author->{_id, name, "slug": slug.current, role, avatar${imageProjection}},
   coverImage${imageProjection}
 }`
 
@@ -93,26 +92,10 @@ const partnerProjection = `select(
 export const LABS_PROJECTS_QUERY = defineQuery(`*[
   _type == "labsProject" && ${publishedDocument}
 ] | order(coalesce(displayOrder, 100) asc, startDate desc, _id asc) {
-  _id, _type, _rev, _updatedAt, title, "slug": slug.current, status,
+  _id, _type, _rev, _updatedAt, title, status,
   "partner": ${partnerProjection},
-  description, tags, startDate, endDate, publicationUrl, cta,
+  description, tags,
   coverImage${imageProjection}
-}`)
-
-export const LABS_PROJECT_BY_SLUG_QUERY = defineQuery(`*[
-  _type == "labsProject" && slug.current == $slug && ${publishedDocument}
-] | order(_updatedAt desc)[0] {
-  _id, _type, _rev, _updatedAt, title, "slug": slug.current, status,
-  "partner": ${partnerProjection},
-  description, tags, startDate, endDate, publicationUrl, cta,
-  body[]{..., _type == "imageWithAlt" => {..., asset->{_id, url, metadata{dimensions{width, height, aspectRatio, lqip}}}}},
-  coverImage${imageProjection},
-  "seo": {
-    "title": coalesce(seo.title, title),
-    "description": coalesce(seo.description, description),
-    "noIndex": coalesce(seo.noIndex, false),
-    "image": seo.image${imageProjection}
-  }
 }`)
 
 export const ACTIVE_ANNOUNCEMENT_QUERY = defineQuery(`*[

@@ -9,17 +9,13 @@ const SITEMAP_QUERY = `{
     _type == "author" && !(_id in path("drafts.**")) && defined(slug.current) &&
     count(*[_type == "post" && !(_id in path("drafts.**")) && publishedAt <= now() &&
       coalesce(seo.noIndex, false) != true && references(^._id)]) > 0
-  ]{"slug": slug.current, _updatedAt},
-  "labs": *[
-    _type == "labsProject" && !(_id in path("drafts.**")) &&
-    coalesce(seo.noIndex, false) != true && defined(slug.current)
   ]{"slug": slug.current, _updatedAt}
 }`
 
 interface SitemapDocument { slug?: string, _updatedAt: string }
-interface SitemapResult { posts: SitemapDocument[], authors: SitemapDocument[], labs: SitemapDocument[] }
+interface SitemapResult { posts: SitemapDocument[], authors: SitemapDocument[] }
 
-/** Runtime sitemap source for published, indexable Sanity detail pages. */
+/** Runtime sitemap source for published, indexable Blog and author pages. */
 export default defineEventHandler(async () => {
   const config = useRuntimeConfig()
   if (!config.public.sanityProjectId || config.public.sanityPreviewEnabled) return []
@@ -35,6 +31,5 @@ export default defineEventHandler(async () => {
   return [
     ...result.posts.map(document => ({ loc: `/blog/${document.slug}`, lastmod: document._updatedAt })),
     ...result.authors.map(document => ({ loc: `/blog/author/${document.slug}`, lastmod: document._updatedAt })),
-    ...result.labs.map(document => ({ loc: `/labs/${document.slug}`, lastmod: document._updatedAt })),
   ]
 })

@@ -38,7 +38,7 @@
           class="article-cover"
           :image="article.coverImage"
           :alt="article.coverImage.alt || ''"
-          sizes="(max-width: 960px) 100vw, 960px"
+          sizes="(max-width: 720px) 100vw, 720px"
           priority
         />
         <div class="article-content prose">
@@ -161,7 +161,7 @@ useCanonical()
 .article-author small { color: rgba(255, 255, 255, 0.45); }
 
 .article-body { padding-top: 0; }
-.article-cover { max-width: 960px; margin: 0 auto 3rem; border-radius: var(--radius-card); }
+.article-cover { max-width: 720px; margin: 0 auto 3rem; border-radius: var(--radius-card); }
 .article-content { max-width: 720px; margin: 0 auto; font-size: 1.0625rem; line-height: 1.8; }
 
 .prose :deep(h2) { margin: 2.5rem 0 0.75rem; font-size: 1.5rem; }

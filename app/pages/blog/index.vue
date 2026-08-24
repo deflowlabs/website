@@ -50,7 +50,6 @@
         <div class="container">
           <div class="blog-section__heading">
             <span class="badge badge-warning">Announcements</span>
-            <h2>Latest announcement</h2>
           </div>
           <BlogPostCard
             :post="announcementStory"
@@ -65,16 +64,11 @@
       <section v-if="featuredStory" class="blog-section section" :class="{ 'blog-section--first': !announcementStory }">
         <div class="container">
           <div class="blog-section__heading">
-            <span class="badge badge-premium">Featured</span>
-            <h2>Featured insight</h2>
+            <h2>Featured</h2>
           </div>
-          <BlogPostCard
-            :post="featuredStory"
-            variant="lead"
-            eyebrow="Featured"
-            eyebrow-class="badge-premium"
-            :priority="!announcementStory"
-          />
+          <div class="blog-grid">
+            <BlogPostCard :post="featuredStory" :priority="!announcementStory" />
+          </div>
         </div>
       </section>
     </template>
@@ -82,7 +76,7 @@
     <section class="blog-section section" :class="{ 'blog-section--first': hasFilters || (!announcementStory && !featuredStory) }">
       <div class="container">
         <div v-if="totalPublished > 0" class="blog-section__heading">
-          <span class="badge badge-info">{{ hasFilters ? 'Results' : 'Latest' }}</span>
+          <span v-if="hasFilters" class="badge badge-info">Results</span>
           <h2>{{ hasFilters ? 'Articles' : 'Most recent' }}</h2>
         </div>
 

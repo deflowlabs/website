@@ -76,11 +76,6 @@ export default defineEventHandler(async (event) => {
       break
     }
     case 'partner': {
-      const projectSlugs = await client.fetch<string[]>(
-        '*[_type == "labsProject" && !(_id in path("drafts.**")) && references($id)].slug.current',
-        { id: document._id },
-      )
-      projectSlugs.filter(Boolean).forEach(slug => paths.add(`/labs/${slug}`))
       break
     }
     case 'announcement':

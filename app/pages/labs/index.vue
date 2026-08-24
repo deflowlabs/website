@@ -57,10 +57,9 @@
         </div>
 
         <div class="labs-projects__grid">
-          <NuxtLink
+          <article
             v-for="(project, projectIndex) in projects"
-            :key="project.slug || project.title || 'project'"
-            :to="`/labs/${clean(project.slug)}`"
+            :key="project._id || project.title || 'project'"
             class="labs-project glass-card"
             :data-sanity="project._id && !project._id.startsWith('placeholder-')
               ? encodeDataAttribute(`[${projectIndex}].title`)
@@ -91,12 +90,8 @@
               <div v-if="project.tags?.length" class="labs-project__tags">
                 <span v-for="tag in project.tags" :key="tag" class="labs-project__tag">{{ tag }}</span>
               </div>
-              <span class="labs-project__link">
-                Explore project
-                <Icon name="lucide:arrow-right" size="14" />
-              </span>
             </div>
-          </NuxtLink>
+          </article>
         </div>
         <p v-if="!projects.length" class="labs-projects__empty">New research initiatives will be published here.</p>
       </div>
@@ -274,7 +269,6 @@ const pillars = [
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  text-decoration: none;
 }
 
 .labs-project__cover { border-radius: 0; }
@@ -315,21 +309,6 @@ const pillars = [
   color: rgba(255, 255, 255, 0.4);
   background: rgba(255, 255, 255, 0.04);
   border: 1px solid rgba(255, 255, 255, 0.06);
-}
-
-.labs-project__link {
-  display: flex;
-  align-items: center;
-  gap: 0.375rem;
-  font-size: 0.8125rem;
-  color: rgba(255, 255, 255, 0.5);
-  text-decoration: none;
-  margin-top: auto;
-  transition: color 0.2s ease;
-}
-
-.labs-project__link:hover {
-  color: #FFFFFF;
 }
 
 .labs-projects__empty { grid-column: 1 / -1; text-align: center; color: var(--color-muted-fg); }

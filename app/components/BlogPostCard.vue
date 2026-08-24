@@ -21,7 +21,6 @@
       <h2>{{ post.title }}</h2>
       <p>{{ post.excerpt }}</p>
       <div class="blog-card__footer">
-        <span>{{ post.author?.name || 'DeFlow Labs' }}</span>
         <Icon name="lucide:arrow-right" size="18" aria-hidden="true" />
       </div>
     </div>
@@ -132,7 +131,7 @@ const formattedDate = computed(() => cleanDate.value
 .blog-card__footer {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-end;
   gap: 1rem;
   margin-top: auto;
   color: rgba(255, 255, 255, 0.5);

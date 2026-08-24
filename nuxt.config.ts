@@ -68,7 +68,6 @@ const contentRouteRules = sanityPreviewEnabled
       '/product': { isr: 3600 },
       '/about': { isr: 3600 },
       '/labs': { isr: 3600 },
-      '/labs/**': { isr: 3600 },
       '/blog': { isr: 600 },
       '/blog/**': { isr: 3600 },
       '/legal/**': { isr: 86400 },
