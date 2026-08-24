@@ -120,21 +120,21 @@ Production has `NUXT_SANITY_PREVIEW_ENABLED=false`, no Viewer token, no Visual E
 | `app/components/PortableContent.vue` | Accessible rich-content rendering |
 | `app/types/sanity.generated.ts` | Generated schema/query types; do not edit |
 
-Public queries exclude drafts and future publication dates. Featured placement requires `isFeatured == true`; populated categories come from referenced published posts; private Partners are projected as `null`; Labs uses explicit `displayOrder`.
+Public queries exclude drafts and future publication dates. Featured placement requires `isFeatured == true`; populated categories come from referenced published posts; private Partners are projected as `null`; Labs uses explicit `displayOrder`. Sanity images are rendered through crop/hotspot-aware WebP and JPEG sources because those are the Content Lake CDN formats used by this integration.
 
 ### CMS-to-website field contract
 
 | Content | Field | Classification | Website behaviour |
 |---|---|---|---|
-| Post | title, slug, excerpt, body, publishedAt, readingTime | Rendered | Blog cards/detail, dates and reading time |
+| Post | title, slug, excerpt, body, publishedAt, readingTime | Rendered | Blog cards/detail, dates and reading time; author attribution appears on the article, not listing cards |
 | Post | categories | Rendered + behavioural | First category is the badge; every category is filterable; slug `announcements` controls the leading announcement-story slot |
 | Post | isFeatured | Behavioural | Exactly one explicit featured slot; never inferred from recency |
 | Post | coverImage/crop/hotspot/alt | Rendered | Responsive 16:9 card/detail images |
 | Post | SEO title, description, image, noIndex | Behavioural | Metadata, social preview, robots and sitemap inclusion |
 | Author | name, slug, portrait, role, biography, public links | Rendered | Attribution and `/blog/author/[slug]` |
-| Labs project | title, slug, summary, details, cover, tags, status, dates | Rendered | Labs cards and `/labs/[slug]` |
-| Labs project | displayOrder | Behavioural | Stable Labs ordering |
-| Labs project | CTA label, URL, style | Rendered + behavioural | Existing primary, secondary or text-link treatment |
+| Labs project | title, summary, cover, tags, status, partner | Rendered | Non-interactive cards on `/labs` |
+| Labs project | dates, displayOrder | Behavioural | Date validation and stable Labs ordering; dates are not displayed |
+| Labs project | slug, details, CTA, publication URL, SEO | Legacy | Preserved in Sanity for existing records; hidden from editors and not queried publicly |
 | Partner | name, logo, URL | Rendered conditionally | Exposed only when `isPublic == true` |
 | Partner | internalNote | Internal-only | Never queried by the website |
 | Website banner | text, tone, CTA, isActive, revision | Rendered + behavioural | Client-fetched banner, accessible tone/style and revision-keyed dismissal |
@@ -194,7 +194,7 @@ Create one Sanity webhook for published `create`, `update` and `delete` events. 
 }
 ```
 
-The endpoint verifies Sanity's signature plus `sanity-project-id` and `sanity-dataset`, rejects drafts and unknown types, and sends Vercel's `x-prerender-revalidate` header only for affected blog, author, Labs, RSS and sitemap routes. Delivery is safe to repeat.
+The endpoint verifies Sanity's signature plus `sanity-project-id` and `sanity-dataset`, rejects drafts and unknown types, and sends Vercel's `x-prerender-revalidate` header only for affected Blog, author, Labs index, RSS and sitemap routes. Delivery is safe to repeat.
 
 ## Verification
 
@@ -207,7 +207,7 @@ npm audit --omit=dev
 npm run preview
 ```
 
-Review home, product, about, Labs, blog index/detail, Portable Text, announcements, sitemap/RSS, mobile navigation and keyboard focus. Confirm drafts require preview, future posts stay absent, and waitlist/contact success plus failure paths work when credentials are present. Review lint warnings rather than silently increasing them.
+Review home, product, about, Labs index, Blog index/detail, Portable Text, announcements, sitemap/RSS, mobile navigation and keyboard focus. Confirm `/labs/<slug>` returns 404, drafts require preview, future posts stay absent, and waitlist/contact success plus failure paths work when credentials are present. Review lint warnings rather than silently increasing them.
 
 ## GitHub Actions
 
