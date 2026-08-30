@@ -211,9 +211,22 @@ Review home, product, about, Labs index, Blog index/detail, Portable Text, annou
 
 ## GitHub Actions
 
-`.github/workflows/ci.yml` runs on pull requests and pushes to `master`, `stage` and `main` with Node 24. It installs from the lockfile, runs unit tests, lint, type checking, a production build and a high-severity production dependency audit. The workflow publishes a readable result table on the run **Summary** page, uses least-privilege permissions, cancels obsolete branch runs and requires no application secret for the quality build.
+`.github/workflows/ci.yml` runs on pull requests and pushes to `main` with Node 24. Its stable required check is `Website / Required`, aggregating:
+
+- unit tests, lint, types, published-only production build and production dependency audit;
+- desktop/mobile Playwright and automated accessibility checks with retained HTML, trace, screenshot and video evidence;
+- a dedicated Presentation build that proves the server-only Sanity read token is absent from browser assets;
+- actionlint, zizmor, Trivy secret/misconfiguration checks, the repository Semgrep policy and a CycloneDX SBOM.
+
+`.github/workflows/deployment-smoke.yml` accepts only `https://deflowlabs.io` or `https://preview.deflowlabs.io`. It can be run manually, and Vercel's GitHub integration can trigger it automatically with the native `vercel.deployment.success` repository-dispatch event. The workflow accepts only production deployments from the two expected Vercel projects, maps their unique deployment URLs to the stable canonical domains and rejects unknown projects or arbitrary hosts before making a request.
+
+The default Vercel project names are `website` and `website-preview`. If the actual project slugs differ, configure repository variables `VERCEL_PRODUCTION_PROJECT_NAME` and `VERCEL_PRESENTATION_PROJECT_NAME` with their exact values. The automatic event payload must include Vercel's documented `environment`, `project.name`, `git.sha` and `url` fields. The workflow appears in the Actions tab only after it has been committed and pushed to the default branch.
 
 Dependabot reviews npm and GitHub Actions updates weekly. Action dependencies are pinned to immutable commit SHAs; review and merge its pull requests only after the full workflow passes.
+
+`@deflowlabs/engineering` owns the repository through `.github/CODEOWNERS`. Protect `main`, require code-owner review, conversation resolution and `Website / Required`, and prevent force pushes. Configure the organisation GitHub App variable `DEFLOW_CI_APP_ID` and secret `DEFLOW_CI_APP_PRIVATE_KEY` where Studio must verify this consumer; grant the App read-only Contents access to this repository only.
+
+Repository workflow permissions can remain read-only. This repository does not require GitHub Actions to create or approve pull requests.
 
 ## Vercel deployment
 

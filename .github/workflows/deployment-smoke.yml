@@ -1,0 +1,83 @@
+name: Website Deployment Smoke
+
+on:
+  repository_dispatch:
+    types: [vercel.deployment.success]
+  workflow_dispatch:
+    inputs:
+      deployment_url:
+        description: Exact DeFlow website URL to verify
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: website-smoke-${{ github.event.client_payload.project.name || 'manual' }}
+  cancel-in-progress: true
+
+jobs:
+  smoke:
+    name: Deployed Website Smoke
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ github.event.client_payload.git.sha || github.sha }}
+          persist-credentials: false
+      - name: Resolve and validate the canonical target
+        id: target
+        shell: bash
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          DEPLOYMENT_ENVIRONMENT: ${{ github.event.client_payload.environment }}
+          DEPLOYMENT_PROJECT: ${{ github.event.client_payload.project.name }}
+          DEPLOYMENT_URL: ${{ github.event.client_payload.url }}
+          MANUAL_URL: ${{ inputs.deployment_url }}
+          PRODUCTION_PROJECT: ${{ vars.VERCEL_PRODUCTION_PROJECT_NAME || 'website' }}
+          PRESENTATION_PROJECT: ${{ vars.VERCEL_PRESENTATION_PROJECT_NAME || 'website-preview' }}
+        run: |
+          set -euo pipefail
+
+          if [ "$EVENT_NAME" = repository_dispatch ]; then
+            test "$DEPLOYMENT_ENVIRONMENT" = production || {
+              echo "Refusing non-production Vercel event for $DEPLOYMENT_PROJECT." >&2
+              exit 1
+            }
+            case "$DEPLOYMENT_PROJECT" in
+              "$PRODUCTION_PROJECT") TARGET_URL='https://deflowlabs.io' ;;
+              "$PRESENTATION_PROJECT") TARGET_URL='https://preview.deflowlabs.io' ;;
+              *) echo "Refusing unknown Vercel project: $DEPLOYMENT_PROJECT" >&2; exit 1 ;;
+            esac
+            echo "Vercel deployment ready: $DEPLOYMENT_URL"
+          else
+            TARGET_URL="$MANUAL_URL"
+          fi
+
+          case "$TARGET_URL" in
+            https://deflowlabs.io|https://preview.deflowlabs.io) ;;
+            *) echo "Refusing unapproved deployment target: $TARGET_URL" >&2; exit 1 ;;
+          esac
+          echo "url=$TARGET_URL" >> "$GITHUB_OUTPUT"
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+      - run: npx --no-install playwright install --with-deps chromium
+      - name: Run browser acceptance against deployment
+        run: npm run test:e2e
+        env:
+          PLAYWRIGHT_BASE_URL: ${{ steps.target.outputs.url }}
+      - name: Upload deployed-site evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: website-deployment-smoke-${{ github.run_number }}
+          path: |
+            playwright-report/
+            test-results/
+          if-no-files-found: warn
+          retention-days: 30
