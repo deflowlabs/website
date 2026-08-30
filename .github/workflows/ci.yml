@@ -184,6 +184,7 @@ jobs:
         run: |
           mkdir -p .ci-reports/semgrep
           docker run --rm --user "$(id -u):$(id -g)" \
+            -e HOME=/tmp/semgrep-home -e XDG_CACHE_HOME=/tmp/semgrep-cache \
             -v "$PWD:/src:ro" -v "$PWD/.ci-reports/semgrep:/reports" \
             "$SEMGREP_IMAGE" semgrep scan --oss-only --no-git-ignore --config /src/.semgrep.yml --error --severity ERROR \
             --exclude '**/.git/**' --exclude '**/node_modules/**' --exclude '**/.nuxt/**' --exclude '**/.output/**' \
