@@ -2,9 +2,9 @@ name: Website CI
 
 on:
   push:
-    branches: [master, stage, main]
+    branches: [main]
   pull_request:
-    branches: [master, stage, main]
+    branches: [main]
 
 permissions:
   contents: read
@@ -13,64 +13,214 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+env:
+  NODE_VERSION: '24'
+  SEMGREP_IMAGE: semgrep/semgrep:1.136.0@sha256:cda1b566fafbf6010a02a3ea1d265b1c8eba4380e489a13891a102243d81ca6f
+  NUXT_SANITY_PROJECT_ID: i34vbeac
+  NUXT_SANITY_DATASET: production
+  NUXT_SANITY_API_VERSION: 2026-08-17
+
 jobs:
   quality:
-    name: Lint, Typecheck & Build
+    name: Application Quality
     runs-on: ubuntu-latest
     timeout-minutes: 25
     steps:
-      - name: Checkout
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-
-      - name: Setup Node.js
-        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+      - name: Check out source
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
-          node-version: '24'
-          cache: 'npm'
-
-      - name: Install dependencies
-        id: install
-        run: npm ci
-
-      - name: Unit tests
-        id: test
+          persist-credentials: false
+      - name: Set up Node.js
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+      - run: npm ci
+      - id: test
         run: npm test
-
-      - name: Lint
-        id: lint
+      - id: lint
         run: npm run lint
-
-      - name: Typecheck
-        id: typecheck
+      - id: typecheck
         run: npm run typecheck
-
-      - name: Build
+      - name: Build published-only production application
         id: build
         run: npm run build
         env:
+          VERCEL_ENV: production
           NUXT_PUBLIC_SITE_URL: https://deflowlabs.io
-          NUXT_SANITY_PROJECT_ID: i34vbeac
-          NUXT_SANITY_DATASET: production
-          NUXT_SANITY_API_VERSION: 2026-08-17
-          NUXT_SANITY_STUDIO_ORIGIN: https://studio.deflowlabs.io
-          # Non-secret sentinel: compiles the server-only Visual Editing path in CI.
-          SANITY_API_READ_TOKEN: ci-visual-editing-build-token
-
-      - name: Audit production dependencies
-        id: audit
+          NUXT_SANITY_PREVIEW_ENABLED: 'false'
+          SANITY_REVALIDATE_SECRET: ci-revalidate-secret
+          VERCEL_ISR_BYPASS_TOKEN: ci-isr-bypass-token
+          NUXT_PUBLIC_TURNSTILE_SITE_KEY: ci-turnstile-site-key
+          TURNSTILE_SECRET_KEY: ci-turnstile-secret
+          RESEND_API_KEY: ci-resend-key
+          PII_SALT_SECRET: ci-pii-salt
+          POSTGRES_URL: postgresql://ci:ci@127.0.0.1:5432/ci
+      - name: Prove production server secrets are absent from browser assets
+        shell: bash
+        run: |
+          for sentinel in ci-revalidate-secret ci-isr-bypass-token ci-turnstile-secret ci-resend-key ci-pii-salt; do
+            if grep -R --fixed-strings "$sentinel" .output/public; then
+              echo "Server-only value reached a public asset: $sentinel" >&2
+              exit 1
+            fi
+          done
+      - id: audit
         run: npm audit --omit=dev --audit-level=high
-
-      - name: Publish website summary
+      - name: Publish quality summary
         if: always()
+        env:
+          TEST_RESULT: ${{ steps.test.outcome }}
+          LINT_RESULT: ${{ steps.lint.outcome }}
+          TYPECHECK_RESULT: ${{ steps.typecheck.outcome }}
+          BUILD_RESULT: ${{ steps.build.outcome }}
+          AUDIT_RESULT: ${{ steps.audit.outcome }}
         run: |
           {
-            echo '## Website quality'
+            echo '## Website application quality'
             echo
             echo '| Gate | Result |'
             echo '|---|---|'
-            echo '| Unit tests | `${{ steps.test.outcome }}` |'
-            echo '| Lint | `${{ steps.lint.outcome }}` |'
-            echo '| Typecheck | `${{ steps.typecheck.outcome }}` |'
-            echo '| Production build | `${{ steps.build.outcome }}` |'
-            echo '| Production dependency audit | `${{ steps.audit.outcome }}` |'
+            echo "| Unit tests | \`$TEST_RESULT\` |"
+            echo "| Lint | \`$LINT_RESULT\` |"
+            echo "| Typecheck | \`$TYPECHECK_RESULT\` |"
+            echo "| Published-only build | \`$BUILD_RESULT\` |"
+            echo "| Production dependency audit | \`$AUDIT_RESULT\` |"
           } >> "$GITHUB_STEP_SUMMARY"
+
+  browser:
+    name: Browser & Accessibility
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+      - run: npm ci
+      - run: npx --no-install playwright install --with-deps chromium
+      - run: npm run test:e2e
+        env:
+          NUXT_PUBLIC_SITE_URL: http://127.0.0.1:3000
+          NUXT_SANITY_PREVIEW_ENABLED: 'false'
+      - name: Upload browser evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: website-playwright-${{ github.sha }}
+          path: |
+            playwright-report/
+            test-results/
+          if-no-files-found: warn
+          retention-days: 30
+
+  preview-contract:
+    name: Preview Isolation Contract
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+      - run: npm ci
+      - name: Compile dedicated Presentation build
+        run: npm run build
+        env:
+          VERCEL_ENV: preview
+          NUXT_PUBLIC_SITE_URL: https://preview.deflowlabs.io
+          NUXT_SANITY_PREVIEW_ENABLED: 'true'
+          NUXT_SANITY_STUDIO_ORIGIN: https://studio.deflowlabs.io
+          SANITY_API_READ_TOKEN: ci-server-only-token-sentinel
+      - name: Prove read token is absent from browser assets
+        shell: bash
+        run: |
+          if grep -R --fixed-strings 'ci-server-only-token-sentinel' .output/public; then
+            echo 'The server-only Sanity token was emitted into a public asset.' >&2
+            exit 1
+          fi
+
+  security:
+    name: Source & Supply Chain
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - name: Lint workflow syntax
+        env:
+          GOBIN: ${{ runner.temp }}/actionlint
+        run: |
+          go install github.com/rhysd/actionlint/cmd/actionlint@v1.7.12
+          "$GOBIN/actionlint" -color
+      - name: Audit workflow security
+        uses: zizmorcore/zizmor-action@3dc1ecc9bcb9e94e9b2c709687979e1298497054 # v0.6.2
+        with:
+          advanced-security: false
+          annotations: true
+          min-severity: high
+          online-audits: false
+          persona: auditor
+          version: 1.29.0
+      - name: Scan secrets and configuration
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          scan-type: fs
+          scan-ref: .
+          scanners: secret,misconfig
+          severity: HIGH,CRITICAL
+          exit-code: '1'
+          format: json
+          output: trivy-fs.json
+          trivy-version: v0.72.0
+      - name: Run repository Semgrep policy
+        run: |
+          mkdir -p .ci-reports/semgrep
+          docker run --rm --user "$(id -u):$(id -g)" \
+            -v "$PWD:/src:ro" -v "$PWD/.ci-reports/semgrep:/reports" \
+            "$SEMGREP_IMAGE" semgrep scan --oss-only --no-git-ignore --config /src/.semgrep.yml --error --severity ERROR \
+            --exclude '**/.git/**' --exclude '**/node_modules/**' --exclude '**/.nuxt/**' --exclude '**/.output/**' \
+            --exclude '**/dist/**' --exclude '**/coverage/**' --exclude '**/playwright-report/**' --exclude '**/test-results/**' \
+            --json-output /reports/semgrep.json /src/app /src/server /src/scripts /src/tests /src/nuxt.config.ts
+      - name: Generate CycloneDX SBOM
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          scan-type: fs
+          scan-ref: .
+          scanners: vuln
+          format: cyclonedx
+          output: sbom.cdx.json
+          exit-code: '0'
+          trivy-version: v0.72.0
+      - name: Upload security evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: website-security-${{ github.sha }}
+          path: |
+            trivy-fs.json
+            sbom.cdx.json
+            .ci-reports/semgrep/
+          if-no-files-found: warn
+          retention-days: 90
+
+  required:
+    name: Website / Required
+    if: always()
+    needs: [quality, browser, preview-contract, security]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Enforce required gates
+        env:
+          QUALITY: ${{ needs.quality.result }}
+          BROWSER: ${{ needs.browser.result }}
+          PREVIEW: ${{ needs.preview-contract.result }}
+          SECURITY: ${{ needs.security.result }}
+        run: test "$QUALITY" = success && test "$BROWSER" = success && test "$PREVIEW" = success && test "$SECURITY" = success

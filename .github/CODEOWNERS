@@ -1,0 +1,6 @@
+* @deflowlabs/engineering
+/.github/ @deflowlabs/engineering
+/app/ @deflowlabs/engineering
+/server/ @deflowlabs/engineering
+/nuxt.config.ts @deflowlabs/engineering
+/vercel.json @deflowlabs/engineering
