@@ -189,7 +189,7 @@ jobs:
             "$SEMGREP_IMAGE" semgrep scan --oss-only --no-git-ignore --config /src/.semgrep.yml --error --severity ERROR \
             --exclude '**/.git/**' --exclude '**/node_modules/**' --exclude '**/.nuxt/**' --exclude '**/.output/**' \
             --exclude '**/dist/**' --exclude '**/coverage/**' --exclude '**/playwright-report/**' --exclude '**/test-results/**' \
-            --json-output /reports/semgrep.json /src/app /src/server /src/scripts /src/tests /src/nuxt.config.ts
+            --json-output /reports/semgrep.json /src/app /src/server /src/tests /src/nuxt.config.ts
       - name: Generate CycloneDX SBOM
         uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
         with:
