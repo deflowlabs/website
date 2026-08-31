@@ -35,7 +35,7 @@
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.13.0",
-    "@iconify-json/lucide": "^1.2.123",
+    "@iconify-json/lucide": "^1.2.126",
     "@nuxt/eslint": "^1.17.0",
     "@playwright/test": "^1.62.1",
     "@sanity/browserslist-config": "1.0.5",
@@ -44,7 +44,7 @@
     "@types/node": "24.13.3",
     "tailwindcss": "^4.1.0",
     "typescript": "5.9.3",
-    "vue-tsc": "^3.3.10"
+    "vue-tsc": "^3.3.11"
   },
   "overrides": {
     "sharp": ">=0.35.0",
