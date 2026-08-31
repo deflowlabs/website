@@ -20,6 +20,15 @@ concurrency:
 jobs:
   smoke:
     name: Deployed Website Smoke
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (
+        github.event.client_payload.environment == 'production' &&
+        (
+          github.event.client_payload.project.name == (vars.VERCEL_PRODUCTION_PROJECT_NAME || 'website') ||
+          github.event.client_payload.project.name == (vars.VERCEL_PRESENTATION_PROJECT_NAME || 'website-preview')
+        )
+      )
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
