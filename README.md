@@ -222,9 +222,9 @@ Review home, product, about, Labs index, Blog index/detail, Portable Text, annou
 
 The default Vercel project names are `website` and `website-preview`. If the actual project slugs differ, configure repository variables `VERCEL_PRODUCTION_PROJECT_NAME` and `VERCEL_PRESENTATION_PROJECT_NAME` with their exact values. The automatic event payload must include Vercel's documented `environment`, `project.name`, `git.sha` and `url` fields. The workflow appears in the Actions tab only after it has been committed and pushed to the default branch.
 
-Dependabot reviews npm and GitHub Actions updates weekly. Action dependencies are pinned to immutable commit SHAs; review and merge its pull requests only after the full workflow passes.
+Dependabot checks npm and GitHub Actions updates on Mondays at 06:00 Europe/Lisbon. Patch, minor and major version updates use 3-, 7- and 30-day cooldowns respectively; security updates are not delayed. Compatible patch/minor updates are grouped, while majors remain separate. After `Website CI` succeeds, `dependabot-queue.yml` enables native squash auto-merge, but one maintainer approval and every protected-branch requirement remain mandatory; the workflow never approves or bypasses a PR.
 
-`@deflowlabs/engineering` owns the repository through `.github/CODEOWNERS`. Protect `main`, require code-owner review, conversation resolution and `Website / Required`, and prevent force pushes. Configure the organisation GitHub App variable `DEFLOW_CI_APP_ID` and secret `DEFLOW_CI_APP_PRIVATE_KEY` where Studio must verify this consumer; grant the App read-only Contents access to this repository only.
+`@deflowlabs/engineering` owns the repository through `.github/CODEOWNERS`. Protect `main`, require code-owner review, conversation resolution and `Website / Required`, and prevent force pushes. Configure the organisation GitHub App variable `DEFLOW_CI_APP_CLIENT_ID` and secret `DEFLOW_CI_APP_PRIVATE_KEY` where Studio must verify this consumer; grant the App read-only Contents access to this repository only.
 
 Repository workflow permissions can remain read-only. This repository does not require GitHub Actions to create or approve pull requests.
 
