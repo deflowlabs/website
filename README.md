@@ -224,6 +224,8 @@ The default Vercel project names are `website` and `website-preview`. If the act
 
 Dependabot checks npm and GitHub Actions updates on Mondays at 06:00 Europe/Lisbon. npm patch, minor and major version updates use 3-, 7- and 30-day cooldowns respectively; Actions use GitHub's supported seven-day default cooldown. Security updates are not delayed. Compatible patch/minor updates are grouped, while majors remain separate. After `Website CI` succeeds, `dependabot-queue.yml` enables native squash auto-merge, but one maintainer approval and every protected-branch requirement remain mandatory; the workflow never approves or bypasses a PR.
 
+Review and triage dependency pull requests using the canonical [Dependabot Pull Request SOP](https://github.com/deflowlabs/core/blob/stage/docs/DEPENDABOT_SOP.md).
+
 `@deflowlabs/engineering` owns the repository through `.github/CODEOWNERS`. Protect `main`, require code-owner review, conversation resolution and `Website / Required`, and prevent force pushes. Configure the organisation GitHub App variable `DEFLOW_CI_APP_CLIENT_ID` and secret `DEFLOW_CI_APP_PRIVATE_KEY` where Studio must verify this consumer; grant the App read-only Contents access to this repository only.
 
 Repository workflow permissions can remain read-only. This repository does not require GitHub Actions to create or approve pull requests.
