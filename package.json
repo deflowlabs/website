@@ -19,18 +19,18 @@
   "dependencies": {
     "@neondatabase/serverless": "^1.1.0",
     "@nuxt/fonts": "^0.14.0",
-    "@nuxt/icon": "^2.5.0",
+    "@nuxt/icon": "^2.5.1",
     "@nuxt/image": "^2.0.0",
     "@nuxtjs/sanity": "2.5.0",
-    "@nuxtjs/sitemap": "^8.3.4",
+    "@nuxtjs/sitemap": "^8.5.0",
     "@portabletext/vue": "2.0.0",
     "@sanity/client": "^7.3.0",
     "@sanity/image-url": "^1.1.0",
     "@sanity/webhook": "^4.0.4",
-    "groq": "6.9.2",
+    "groq": "6.10.1",
     "nuxt": "^4.5.2",
     "nuxt-site-config": "^4.1.2",
-    "vue": "^3.5.41",
+    "vue": "^3.5.42",
     "vue-router": "^5.1.0"
   },
   "devDependencies": {
