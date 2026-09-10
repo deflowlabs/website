@@ -35,7 +35,7 @@
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.13.0",
-    "@iconify-json/lucide": "^1.2.126",
+    "@iconify-json/lucide": "^1.2.129",
     "@nuxt/eslint": "^1.17.0",
     "@playwright/test": "^1.62.1",
     "@sanity/browserslist-config": "1.0.5",
