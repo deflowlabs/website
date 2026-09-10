@@ -25,7 +25,7 @@
     "@nuxtjs/sitemap": "^8.5.0",
     "@portabletext/vue": "2.0.0",
     "@sanity/client": "^7.3.0",
-    "@sanity/image-url": "^1.1.0",
+    "@sanity/image-url": "^2.1.1",
     "@sanity/webhook": "^4.0.4",
     "groq": "6.10.1",
     "nuxt": "^4.5.2",
