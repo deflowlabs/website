@@ -54,7 +54,7 @@ Give every item of the previous pack a disposition in `reconciliation.json` and 
 
 ## 6. Method
 
-Work in phases and checkpoint each in `audit/PROGRESS.md`: preflight → baseline → reconciliation → inventory and coverage → lanes A–J → reconciliation of lanes → safe fixes → pack → GitHub writes → verification → handoff. Fan lanes out to sub-agents with a written brief (scope, baseline, evidence prefix, output, forbidden actions, the section 7 probes in their lane); keep severity calibration and the decision with the lead agent.
+Work in phases and checkpoint each in `audit/PROGRESS.md`: preflight → baseline → reconciliation → inventory and coverage → lanes A–L → reconciliation of lanes → safe fixes → pack → GitHub writes → verification → handoff. Fan lanes out to sub-agents with a written brief (scope, baseline, evidence prefix, output, forbidden actions, the section 7 probes in their lane); keep severity calibration and the decision with the lead agent.
 
 Derive every inventory from source: pages and routes, components, composables, server APIs and routes, database tables, Sanity queries, environment variables, workflows, tests, documents. Maintain `coverage.csv` (surface, importance, method, depth, evidence, result, untested remainder). A grep or a green CI run is never "reviewed". Run what the repository provides — read `package.json` rather than trusting a list — and record expected versus observed for each command in `checks/`. Audit failure paths, not only happy ones: every catch, fallback and rate limit is a claim about what happens when something breaks. Attack every gate with inputs that pass it while violating its intent. Test controls together, on a fresh deployment rather than a warm one. Measure cost from Vercel, Sanity, Resend and database usage, not by estimate. Close each lane with what its method could not see.
 
@@ -83,7 +83,7 @@ Build `inventory.json` covering: every page and route and its data source; compo
 
 ## 9. Review lanes
 
-Every lane answers: what is true today, with evidence; what must change before the gate assessed, with the smallest effective remedy; what should be removed or simplified.
+Every lane answers: what is true today, with evidence; what must change before the gate assessed, with the smallest effective remedy; what should be removed or simplified; and what would make it materially better. Lanes A to K are the dimensions every DeFlow Labs repository is audited on; lane L is this repository's own.
 
 ### A. Architecture and code quality
 Nuxt configuration, rendering and caching strategy per route (SSR, ISR, prerender), data fetching and error handling, composables and components, dead code, duplication, typing, lint suppressions, dependency health, reproducible builds and onboarding from a clean clone.
@@ -91,25 +91,31 @@ Nuxt configuration, rendering and caching strategy per route (SSR, ISR, prerende
 ### B. Security and privacy
 Server APIs, input validation, rate limiting, bot protection, CSP and headers, cookies and consent, analytics and third-party scripts, secrets handling, the database and its access, e-mail sending, and personal data from form to storage to deletion. Probes 2 to 6.
 
-### C. Content, claims and legal pages
+### C. UI/UX and visual design
+Judged on the rendered site, with a screenshot per breakpoint in `checks/`: information architecture and navigation; visual hierarchy, typography, spacing, imagery and motion; interaction states (hover, focus, loading, empty, error, success); form experience (labels, inline errors, confirmation, what happens next); consistency with the design tokens. Responsive behaviour on a small phone, a large phone, a tablet, a laptop and a wide desktop, in both orientations: layouts that break, text that overflows, touch targets that are too small, horizontal scrolling, and images that are cropped or oversized.
+
+### D. Accessibility
+WCAG 2.2 AA on every page and state: automated checks (axe) plus a manual pass — keyboard-only navigation, focus order and visibility, a screen-reader walk-through (NVDA or VoiceOver), colour contrast, zoom to 200 % and reflow at 320 CSS pixels, reduced motion, target size, form errors announced to assistive technology, alternative text coming from the CMS, and captions for any media.
+
+### E. Performance, scalability, reliability and cost
+Core Web Vitals (LCP, INP, CLS) measured on real routes on mobile and desktop; page, script and image weight; caching through ISR, the CDN and response headers. Model a traffic spike — a launch, a press mention, an investor update — and find what fails first: serverless concurrency, database connections opened from serverless functions and whether they are pooled, rate limits, Sanity API and CDN quotas, e-mail sending limits, cold starts. Uptime monitoring and who is alerted. Cost at 10x and 100x traffic from Vercel, Sanity, database and e-mail pricing, measured from usage where possible.
+
+### F. Content, claims and legal pages
 Probe 1 across pages and CMS content; the legal pages (privacy, terms, cookies, imprint) against what the site actually does; the CMS-to-website field contract; broken or orphaned content; content that belongs in the documentation site instead.
 
-### D. Experience, accessibility, performance and SEO
-The rendered site on mobile, tablet and desktop: information architecture, navigation, hierarchy, calls to action and the paths to conversion; loading, empty and error states; WCAG 2.2 AA with automated and manual checks; Core Web Vitals and Lighthouse results as measured; metadata, Open Graph, sitemap, robots, structured data, canonical URLs and redirects.
+### G. Brand, terminology and consistency
+Name, terminology, tone, visual language and design tokens against the product and the documentation site; whether the message matches what the product does today and the segment it targets; hand-offs between the three surfaces.
 
-### E. Brand and positioning
-Consistency of name, terminology, tone, visual language and design tokens with the product and the documentation site; whether the message matches what the product actually does today and the segment it targets.
+### H. CMS integration
+Queries against the studio schema, TypeGen or typing drift, preview, revalidation, image handling and alternative text, and behaviour when Sanity is slow or down.
 
-### F. CMS integration
-Queries against the studio schema, TypeGen or typing drift, preview, revalidation, image handling and alt text, and behaviour when Sanity is slow or down.
-
-### G. Delivery and GitHub configuration
+### I. Delivery and GitHub configuration
 Each workflow (triggers, permissions, secrets, concurrency, timeouts, failure semantics, artifacts, owner, minutes); Dependabot; rulesets and merge settings; Vercel build, preview and production promotion, rollback and domain configuration. Probes 7 to 9.
 
-### H. Integrations
-One matrix for Sanity, PostgreSQL, Resend, Cloudflare Turnstile, Vercel and any analytics or other vendor: purpose, data exchanged, credential and its target per environment, failure behaviour, quotas, cost and data terms. Write it in `07-integrations.md`.
+### J. Integrations
+One matrix for Sanity, PostgreSQL, Resend, Cloudflare Turnstile, Vercel and any analytics or other vendor: purpose, data exchanged, credential and its target per environment, failure behaviour, quotas, cost and data terms.
 
-### I. Documentation and onboarding
+### K. Documentation and onboarding
 Judge the README and every internal document against the rubric below, and walk the onboarding path as a new engineer and as a new content editor, recording every loop, dead end, stale fact and duplicated section with its word count and reading time. Propose the target structure for this repository's documentation: what merges, what moves to the documentation site or to Core, what is deleted, and what is better shown as a diagram, a table or an annotated screenshot — with the source format of each visual and what triggers its update.
 
 | Criterion | Test |
@@ -124,8 +130,8 @@ Judge the README and every internal document against the rubric below, and walk 
 | Accessible | Ordered headings, descriptive links, text alternatives |
 | Claim-safe | No claim the ledger does not support |
 
-### J. Commercial effectiveness
-Who the site is for, what it asks them to do, and whether it works: the conversion paths, what is measured and what is not, and the cheapest experiment to learn more. Label inferences.
+### L. Conversion and improvements
+Who the site is for, what it asks each visitor to do, and whether it works: the conversion paths, what is measured and what is not, drop-off points, and the cheapest experiment to learn more. Then a ranked list of improvements beyond defects — content, design, performance, features such as case studies, comparison pages or an investor area — each with the need it serves, expected value, effort, cost, risk and the smallest experiment. Label inferences.
 
 ## 10. Decision
 
@@ -147,11 +153,12 @@ Register every finding in `findings.json` and render `03-findings.md`. Each carr
 - `01-scope-and-coverage.md`, `coverage.csv`, `baseline.json`, `inventory.json`.
 - `02-reconciliation.md`, `reconciliation.json`.
 - `03-findings.md`, `findings.json`, `evidence-ledger.json`, `checks/`.
-- `04-experience.md` — lanes D and E.
-- `05-security-and-delivery.md` — lanes B and G.
-- `06-content-and-documentation.md` — lanes C and I.
-- `07-integrations.md` — lane H.
-- `08-commercial.md` — lane J.
+- `04-experience.md` — lanes C, D and G, with the screenshots per breakpoint.
+- `05-performance-and-scalability.md` — lane E.
+- `06-security-and-delivery.md` — lanes A, B and I.
+- `07-content-and-documentation.md` — lanes F, H and K.
+- `08-integrations.md` — lane J.
+- `09-conversion-and-improvements.md` — lane L.
 - `docs-inventory.json` — for the Core audit: every document and page in this repository with path or URL, audience, Diátaxis type, owner, last verified date, word count, and the facts it overlaps with other documents.
 - `claims.json` — for the Core audit: every public claim with its location, exact wording, the ledger fact it depends on, and pass or fail.
 - `PROGRESS.md` — phase ledger and handoff.
